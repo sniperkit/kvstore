@@ -2,6 +2,7 @@ package kvstore
 
 import "fmt"
 
+// Conn connection interface.
 type Conn interface {
 	Close() error
 	Lease(ttl int) (Lease, error)
@@ -12,6 +13,7 @@ type Conn interface {
 	Watch(path string) Watch
 }
 
+// Open connection to database.
 func Open(driver string, endpoints []string, options ...func(Driver) error) (Conn, error) {
 	d, ok := drivers[driver]
 	if !ok {
@@ -27,6 +29,7 @@ func Open(driver string, endpoints []string, options ...func(Driver) error) (Con
 	return d.Open(endpoints)
 }
 
+// Timeout for database connection.
 func Timeout(timeout int) func(Driver) error {
 	return func(d Driver) error {
 		return d.SetTimeout(timeout)
