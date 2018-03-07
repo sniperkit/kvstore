@@ -8,6 +8,7 @@ type Conn interface {
 	Lease(ttl int) (Lease, error)
 	Set(key string, value interface{}) error
 	SetWithLease(key string, value interface{}, lease Lease) error
+	Delete(key string) error
 	Keys(path string) ([]string, error)
 	Values(path string) (KeyValues, error)
 	Watch(path string) Watch

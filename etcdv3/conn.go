@@ -61,6 +61,14 @@ func (c *conn) SetWithLease(key string, value interface{}, l kvstore.Lease) erro
 	return nil
 }
 
+func (c *conn) Delete(key string) error {
+	kvc := clientv3.NewKV(c.client)
+	if _, err := kvc.Delete(context.TODO(), key); err != nil {
+		return fmt.Errorf("delete key [%s]: %v", key, err)
+	}
+	return nil
+}
+
 func (c *conn) Keys(path string) ([]string, error) {
 	resp, err := c.client.Get(context.TODO(), path, clientv3.WithPrefix(), clientv3.WithKeysOnly())
 	if err != nil {
