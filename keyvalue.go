@@ -5,7 +5,8 @@ type Value []byte
 
 // KeyValue struct contains event, key and value.
 type KeyValue struct {
-	Key string
+	Key   string
+	Lease Lease
 	*Event
 	Value
 }
