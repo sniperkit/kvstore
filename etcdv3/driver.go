@@ -10,11 +10,41 @@ import (
 )
 
 type driver struct {
-	timeout int
+	timeout  int
+	cert     string
+	key      string
+	ca       string
+	user     string
+	password string
 }
 
 func (d *driver) SetTimeout(timeout int) error {
 	d.timeout = timeout
+	return nil
+}
+
+func (d *driver) SetCert(cert string) error {
+	d.cert = cert
+	return nil
+}
+
+func (d *driver) SetKey(key string) error {
+	d.key = key
+	return nil
+}
+
+func (d *driver) SetCA(ca string) error {
+	d.ca = ca
+	return nil
+}
+
+func (d *driver) SetUser(user string) error {
+	d.user = user
+	return nil
+}
+
+func (d *driver) SetPassword(password string) error {
+	d.password = password
 	return nil
 }
 

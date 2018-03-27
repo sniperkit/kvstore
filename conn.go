@@ -36,3 +36,38 @@ func Timeout(timeout int) func(Driver) error {
 		return d.SetTimeout(timeout)
 	}
 }
+
+// TLS certificate for database connection.
+func Cert(cert string) func(Driver) error {
+	return func(d Driver) error {
+		return d.SetCert(cert)
+	}
+}
+
+// TLS key for database connection.
+func Key(key string) func(Driver) error {
+	return func(d Driver) error {
+		return d.SetKey(key)
+	}
+}
+
+// TLS certificate authority for database connection.
+func CA(ca string) func(Driver) error {
+	return func(d Driver) error {
+		return d.SetCA(ca)
+	}
+}
+
+// User for database connection.
+func User(user string) func(Driver) error {
+	return func(d Driver) error {
+		return d.SetUser(user)
+	}
+}
+
+// Password for database connection.
+func Password(password string) func(Driver) error {
+	return func(d Driver) error {
+		return d.SetPassword(password)
+	}
+}
