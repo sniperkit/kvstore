@@ -1,26 +1,30 @@
-package etcdv3
+package etcdv2
 
 import (
 	"crypto/tls"
 	"fmt"
+	"net"
+	"net/http"
 	"time"
 
 	"github.com/mickep76/kvstore"
 
-	"github.com/coreos/etcd/clientv3"
+	"github.com/coreos/etcd/client"
 )
 
 type driver struct {
-	clientv3.Config
+	timeout int
+	tls     *tls.Config
+	client.Config
 }
 
 func (d *driver) SetTimeout(timeout int) error {
-	d.DialTimeout = time.Duration(timeout) * time.Second
+	d.timeout = timeout
 	return nil
 }
 
 func (d *driver) SetTLS(config *tls.Config) error {
-	d.TLS = config
+	d.tls = config
 	return nil
 }
 
@@ -37,7 +41,19 @@ func (d *driver) SetPassword(password string) error {
 func (d *driver) Open(endpoints []string) (kvstore.Conn, error) {
 	d.Endpoints = endpoints
 
-	c, err := clientv3.New(d.Config)
+	tr := &http.Transport{
+		Dial: (&net.Dialer{
+			Timeout:   time.Duration(d.timeout) * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).Dial,
+		TLSHandshakeTimeout: 10 * time.Second,
+	}
+
+	if d.tls != nil {
+		tr.TLSClientConfig = d.tls
+	}
+
+	c, err := client.New(d.Config)
 	if err != nil {
 		return nil, fmt.Errorf("conn: %v", err)
 	}
@@ -48,5 +64,7 @@ func (d *driver) Open(endpoints []string) (kvstore.Conn, error) {
 }
 
 func init() {
-	kvstore.Register("etcdv3", &driver{})
+	kvstore.Register("etcdv2", &driver{
+		timeout: 30,
+	})
 }

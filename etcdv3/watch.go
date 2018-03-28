@@ -1,4 +1,4 @@
-package etcd
+package etcdv3
 
 import (
 	"github.com/mickep76/kvstore"
