@@ -54,38 +54,34 @@ func (c *conn) Delete(key string) error {
 }
 
 func (c *conn) Keys(path string) ([]string, error) {
-	/*
-		resp, err := c.client.Get(context.TODO(), path, clientv3.WithPrefix(), clientv3.WithKeysOnly())
-		if err != nil {
-			return nil, fmt.Errorf("keys: %v", err)
-		}
+	kvc := client.NewKeysAPI(*c.client)
+	resp, err := kvc.Get(context.TODO(), path, nil)
+	if err != nil {
+		return nil, err
+	}
 
-		keys := []string{}
-		for _, kv := range resp.Kvs {
-			keys = append(keys, string(kv.Key))
-		}
-
-		return keys, nil
-	*/
-	return nil, nil
+	// TODO: add recursion and only fetch keys
+	keys := []string{}
+	for _, kv := range resp.Node.Nodes {
+		keys = append(keys, string(kv.Key))
+	}
+	return keys, nil
 }
 
 func (c *conn) Values(key string) (kvstore.KeyValues, error) {
-	/*
-		resp, err := c.client.Get(context.TODO(), key, clientv3.WithPrefix())
-		if err != nil {
-			return nil, fmt.Errorf("values: %v", err)
-		}
+	kvc := client.NewKeysAPI(*c.client)
+	resp, err := kvc.Get(context.TODO(), key, nil)
+	if err != nil {
+		return nil, err
+	}
 
-		values := kvstore.KeyValues{}
-		for _, kv := range resp.Kvs {
-			// TODO: add TTL for lease, if leaseID is 0 set nil for no lease.
-			values = append(values, &kvstore.KeyValue{Key: string(kv.Key), Lease: &lease{id: clientv3.LeaseID(kv.Lease)}, Value: kvstore.Value(kv.Value)})
-		}
-
-		return values, nil
-	*/
-	return nil, nil
+	// TODO: add recursion
+	values := kvstore.KeyValues{}
+	for _, kv := range resp.Node.Nodes {
+		// TODO: add TTL
+		values = append(values, &kvstore.KeyValue{Key: string(kv.Key), Value: kvstore.Value(kv.Value)})
+	}
+	return values, nil
 }
 
 func (c *conn) Watch(path string) kvstore.Watch {
