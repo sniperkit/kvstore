@@ -11,37 +11,33 @@ import (
 )
 
 type driver struct {
-	timeout  int
-	tls      *tls.Config
-	user     string
-	password string
+	clientv3.Config
 }
 
 func (d *driver) SetTimeout(timeout int) error {
-	d.timeout = timeout
+	d.DialTimeout = time.Duration(timeout) * time.Second
 	return nil
 }
 
 func (d *driver) SetTLS(config *tls.Config) error {
-	d.tls = config
+	d.TLS = config
 	return nil
 }
 
 func (d *driver) SetUser(user string) error {
-	d.user = user
+	d.Username = user
 	return nil
 }
 
 func (d *driver) SetPassword(password string) error {
-	d.password = password
+	d.Password = password
 	return nil
 }
 
 func (d *driver) Open(endpoints []string) (kvstore.Conn, error) {
-	c, err := clientv3.New(clientv3.Config{
-		Endpoints:   endpoints,
-		DialTimeout: time.Duration(d.timeout) * time.Second,
-	})
+	d.Endpoints = endpoints
+
+	c, err := clientv3.New(d.Config)
 	if err != nil {
 		return nil, fmt.Errorf("conn: %v", err)
 	}
