@@ -59,7 +59,7 @@ func (d *driver) Open(endpoints []string) (kvstore.Conn, error) {
 	}
 
 	return &conn{
-		client: c,
+		client: &c,
 	}, nil
 }
 
