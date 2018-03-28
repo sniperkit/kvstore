@@ -1,6 +1,9 @@
 package kvstore
 
-import "fmt"
+import (
+	"crypto/tls"
+	"fmt"
+)
 
 // Conn connection interface.
 type Conn interface {
@@ -37,24 +40,10 @@ func Timeout(timeout int) func(Driver) error {
 	}
 }
 
-// TLS certificate for database connection.
-func Cert(cert string) func(Driver) error {
+// TLS config for database connection.
+func TLS(config *tls.Config) func(Driver) error {
 	return func(d Driver) error {
-		return d.SetCert(cert)
-	}
-}
-
-// TLS key for database connection.
-func Key(key string) func(Driver) error {
-	return func(d Driver) error {
-		return d.SetKey(key)
-	}
-}
-
-// TLS certificate authority for database connection.
-func CA(ca string) func(Driver) error {
-	return func(d Driver) error {
-		return d.SetCA(ca)
+		return d.SetTLS(config)
 	}
 }
 

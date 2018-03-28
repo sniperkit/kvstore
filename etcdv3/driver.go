@@ -1,6 +1,7 @@
 package etcd
 
 import (
+	"crypto/tls"
 	"fmt"
 	"time"
 
@@ -11,9 +12,7 @@ import (
 
 type driver struct {
 	timeout  int
-	cert     string
-	key      string
-	ca       string
+	tls      *tls.Config
 	user     string
 	password string
 }
@@ -23,18 +22,8 @@ func (d *driver) SetTimeout(timeout int) error {
 	return nil
 }
 
-func (d *driver) SetCert(cert string) error {
-	d.cert = cert
-	return nil
-}
-
-func (d *driver) SetKey(key string) error {
-	d.key = key
-	return nil
-}
-
-func (d *driver) SetCA(ca string) error {
-	d.ca = ca
+func (d *driver) SetTLS(config *tls.Config) error {
+	d.tls = config
 	return nil
 }
 
