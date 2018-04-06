@@ -1,14 +1,15 @@
 package etcdv2
 
 import (
+	"github.com/coreos/etcd/client"
+
 	"github.com/mickep76/kvstore"
-	//	"github.com/coreos/etcd/client"
 )
 
 type watch struct {
 	filter   *kvstore.EventType
 	handlers kvstore.WatchHandlers
-	//	ch       clientv3.WatchChan
+	watcher  client.Watcher
 }
 
 func (w *watch) EventType(filter kvstore.EventType) kvstore.Watch {

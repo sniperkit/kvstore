@@ -93,7 +93,7 @@ func (c *conn) Values(key string) (kvstore.KeyValues, error) {
 	values := kvstore.KeyValues{}
 	for _, kv := range resp.Kvs {
 		// TODO: add TTL for lease, if leaseID is 0 set nil for no lease.
-		values = append(values, &kvstore.KeyValue{Key: string(kv.Key), Lease: &lease{id: clientv3.LeaseID(kv.Lease)}, Value: kvstore.Value(kv.Value)})
+		values = append(values, &keyValue{Key: string(kv.Key), Lease: &lease{id: clientv3.LeaseID(kv.Lease)}, Value: kvstore.Value(kv.Value)})
 	}
 
 	return values, nil

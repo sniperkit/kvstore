@@ -9,8 +9,7 @@ import (
 type Conn interface {
 	Close() error
 	Lease(ttl int) (Lease, error)
-	Set(key string, value interface{}) error
-	SetWithLease(key string, value interface{}, lease Lease) error
+	Set(key string, value interface{}, options ...func(KeyValue)) error
 	Delete(key string) error
 	Keys(path string) ([]string, error)
 	Values(path string) (KeyValues, error)
@@ -58,5 +57,19 @@ func User(user string) func(Driver) error {
 func Password(password string) func(Driver) error {
 	return func(d Driver) error {
 		return d.SetPassword(password)
+	}
+}
+
+// OpLease for key/value.
+func OpLease(lease Lease) func(KeyValue) error {
+	return func(kv KeyValue) error {
+		return kv.SetLease(lease)
+	}
+}
+
+// OpTTL for key/value.
+func OpTTL(ttl int) func(KeyValue) error {
+	return func(kv KeyValue) error {
+		return kv.SetTTL(ttl)
 	}
 }

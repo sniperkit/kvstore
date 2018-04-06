@@ -3,16 +3,18 @@ package kvstore
 // Value of key.
 type Value []byte
 
-// KeyValue struct contains event, key and value.
-type KeyValue struct {
-	Key   string
-	Lease Lease
-	*Event
-	Value
+// KeyValue interface.
+type KeyValue interface {
+	Key() string
+	Value() Value
+	Lease() Lease
+	TTL() int
+	SetLease(lease Lease) error
+	SetTTL(ttl int) error
 }
 
 // KeyValues multiple key/values.
-type KeyValues []*KeyValue
+type KeyValues []KeyValue
 
 // MarshalJSON for key/value.
 func (m Value) MarshalJSON() ([]byte, error) {

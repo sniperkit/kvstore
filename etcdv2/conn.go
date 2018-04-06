@@ -33,6 +33,7 @@ func (c *conn) Set(key string, value interface{}) error {
 		return fmt.Errorf("marshal value [%+v] for key [%s]: %v", value, key, err)
 	}
 
+	// TODO: recursive create dir. and then set key
 	kvc := client.NewKeysAPI(*c.client)
 	if _, err = kvc.Create(context.TODO(), key, string(b)); err != nil {
 		return fmt.Errorf("set key [%s]: %v", key, err)
@@ -85,11 +86,11 @@ func (c *conn) Values(key string) (kvstore.KeyValues, error) {
 }
 
 func (c *conn) Watch(path string) kvstore.Watch {
-	/*
-		return &watch{
-			handlers: kvstore.WatchHandlers{},
-			ch:       c.client.Watch(context.Background(), path, clientv3.WithPrefix()),
-		}
-	*/
+	kvc := client.NewKeysAPI(*c.client)
+
+	return &watch{
+		handlers: kvstore.WatchHandlers{},
+		watcher:  kvc.Watcher(path, &client.WatcherOptions{Recursive: true}),
+	}
 	return nil
 }
