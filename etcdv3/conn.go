@@ -35,7 +35,7 @@ func (c *conn) Lease(ttl int) (kvstore.Lease, error) {
 	}, nil
 }
 
-func (c *conn) Set(key string, value interface{}, options ...func(kvstore.KeyValue)) error {
+func (c *conn) Set(key string, value interface{}, options ...func(kvstore.KeyValue) error) error {
 	b, err := json.Marshal(value)
 	if err != nil {
 		return fmt.Errorf("marshal value [%+v] for key [%s]: %v", value, key, err)

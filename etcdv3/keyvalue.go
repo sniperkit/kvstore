@@ -27,7 +27,7 @@ func (kv keyValue) Lease() kvstore.Lease {
 	return kv.lease
 }
 
-func (kv keyValue) Event() kvstore.Lease {
+func (kv keyValue) Event() *kvstore.Event {
 	return kv.event
 }
 
