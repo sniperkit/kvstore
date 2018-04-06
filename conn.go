@@ -9,7 +9,7 @@ import (
 type Conn interface {
 	Close() error
 	Lease(ttl int) (Lease, error)
-	Set(key string, value interface{}, options ...func(KeyValue)) error
+	Set(key string, value interface{}, options ...func(KeyValue) error) error
 	Delete(key string) error
 	Keys(path string) ([]string, error)
 	Values(path string) (KeyValues, error)
