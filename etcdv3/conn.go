@@ -36,13 +36,25 @@ func (c *conn) Lease(ttl int) (kvstore.Lease, error) {
 }
 
 func (c *conn) Set(key string, value interface{}, options ...func(kvstore.KeyValue) error) error {
+	kv := keyValue{}
+	for _, option := range options {
+		if err := option(kv); err != nil {
+			return err
+		}
+	}
+
+	opts := []clientv3.OpOption{}
+	if kv.lease != nil {
+		opts = append(opts, clientv3.WithLease(kv.lease.(*lease).id))
+	}
+
 	b, err := json.Marshal(value)
 	if err != nil {
 		return fmt.Errorf("marshal value [%+v] for key [%s]: %v", value, key, err)
 	}
 
 	kvc := clientv3.NewKV(c.client)
-	if _, err := kvc.Put(context.TODO(), key, string(b)); err != nil {
+	if _, err := kvc.Put(context.TODO(), key, string(b), opts...); err != nil {
 		return fmt.Errorf("set key [%s]: %v", key, err)
 	}
 	return nil
