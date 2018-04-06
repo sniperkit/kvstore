@@ -8,11 +8,8 @@ import (
 	"github.com/docopt/docopt-go"
 	"github.com/mickep76/kvstore"
 	_ "github.com/mickep76/kvstore/etcdv3"
+	"github.com/mickep76/kvstore/example/models"
 )
-
-type Host struct {
-	Hostname string `json:"hostname"`
-}
 
 func main() {
 	usage := `client
