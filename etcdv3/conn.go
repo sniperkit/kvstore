@@ -44,9 +44,9 @@ func (c *conn) Set(key string, value interface{}, options ...func(kvstore.KeyVal
 	}
 
 	opts := []clientv3.OpOption{}
-	if kv.lease != nil {
-		opts = append(opts, clientv3.WithLease(kv.lease.(*lease).id))
-	}
+	//	if kv.lease != nil {
+	//		opts = append(opts, clientv3.WithLease(kv.lease.(*lease).id))
+	//	}
 
 	b, err := json.Marshal(value)
 	if err != nil {
