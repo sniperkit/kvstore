@@ -9,6 +9,7 @@ type KeyValue interface {
 	Value() Value
 	Lease() Lease
 	TTL() int
+	Event() *Event
 	SetLease(lease Lease) error
 	SetTTL(ttl int) error
 }

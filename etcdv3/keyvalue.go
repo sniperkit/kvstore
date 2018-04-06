@@ -10,7 +10,7 @@ type keyValue struct {
 	ttl   int
 	prev  kvstore.Value
 	value kvstore.Value
-	*kvstore.Event
+	event *kvstore.Event
 }
 
 type keyValues []*keyValue
@@ -25,6 +25,10 @@ func (kv keyValue) Value() kvstore.Value {
 
 func (kv keyValue) Lease() kvstore.Lease {
 	return kv.lease
+}
+
+func (kv keyValue) Event() kvstore.Lease {
+	return kv.event
 }
 
 func (kv keyValue) TTL() int {
