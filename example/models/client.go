@@ -1,8 +1,10 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/mickep76/kvstore"
 	"github.com/pborman/uuid"
 )
 
@@ -22,6 +24,22 @@ func NewClient(hostname string) *Client {
 	}
 }
 
-func ClientAll() (Clients, error) {
-	return Clients{}, nil
+func ClientAll(kvc kvstore.Conn, prefix string) (Clients, error) {
+	kvs, err := kvc.Values(fmt.Sprintf("%s/%s", prefix, "clients"))
+	if err != nil {
+		return nil, err
+	}
+
+	clients := Clients{}
+	for _, kv := range kvs {
+		c := &Client{}
+		kv.SetEncoding("json")
+		if err := kv.Decode(c); err != nil {
+			return nil, err
+		}
+
+		clients = append(clients, c)
+	}
+
+	return clients, nil
 }

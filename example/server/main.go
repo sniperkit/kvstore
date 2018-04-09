@@ -18,6 +18,11 @@ import (
 	"github.com/mickep76/kvstore/example/models"
 )
 
+var (
+	kvc    kvstore.Conn
+	prefix string
+)
+
 var clientHandler = kvstore.WatchHandler(func(kv kvstore.KeyValue) {
 	log.Printf("client event: %s key: %s", kv.Event().Type, kv.Key())
 
@@ -32,7 +37,7 @@ var clientHandler = kvstore.WatchHandler(func(kv kvstore.KeyValue) {
 })
 
 var clientAll = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	v, err := models.ClientAll()
+	v, err := models.ClientAll(kvc, prefix)
 	if err != nil {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -79,10 +84,10 @@ Options:
 	}
 
 	// Get prefix.
-	prefix := args["--prefix"].(string)
+	prefix = args["--prefix"].(string)
 
 	// Connect to etcd.
-	kvc, err := kvstore.Open("etcdv3", strings.Split(args["--endpoints"].(string), ","), kvstore.Timeout(timeout))
+	kvc, err = kvstore.Open("etcdv3", strings.Split(args["--endpoints"].(string), ","), kvstore.Timeout(timeout))
 	if err != nil {
 		log.Fatal(err)
 	}
