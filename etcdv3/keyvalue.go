@@ -29,6 +29,13 @@ func (kv keyValue) Value() kvstore.Value {
 	return kv.value
 }
 
+func (kv keyValue) Decode(value interface{}) error {
+	if err := encdec.FromBytes(kv.encoding, kv.value, value); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (kv keyValue) Lease() kvstore.Lease {
 	return kv.lease
 }

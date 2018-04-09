@@ -74,9 +74,6 @@ func (c *conn) Set(key string, value interface{}, options ...func(kvstore.KeyVal
 	return nil
 }
 
-//func (c *conn) Get(key string, value interface{}, options ...func(kvstore.KeyValue) error) error {
-//}
-
 func (c *conn) Delete(key string) error {
 	kvc := clientv3.NewKV(c.client)
 	if _, err := kvc.Delete(context.TODO(), key); err != nil {
