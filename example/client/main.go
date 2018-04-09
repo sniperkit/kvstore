@@ -67,8 +67,8 @@ Options:
 		log.Fatal(err)
 	}
 
-	// Create new host struct.
-	log.Printf("create new host struct")
+	// Create new client struct.
+	log.Printf("create new client struct")
 	hostname, _ := os.Hostname()
 	c := models.NewClient(hostname)
 
