@@ -11,6 +11,7 @@ type KeyValue interface {
 	Lease() Lease
 	TTL() int
 	Event() *Event
+	Encoding() string
 	SetLease(lease Lease) error
 	SetTTL(ttl int) error
 	SetEncoding(encoding string) error

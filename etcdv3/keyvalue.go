@@ -21,46 +21,50 @@ type keyValue struct {
 
 type keyValues []*keyValue
 
-func (kv keyValue) Key() string {
+func (kv *keyValue) Key() string {
 	return kv.key
 }
 
-func (kv keyValue) Value() kvstore.Value {
+func (kv *keyValue) Value() kvstore.Value {
 	return kv.value
 }
 
-func (kv keyValue) Decode(value interface{}) error {
+func (kv *keyValue) Decode(value interface{}) error {
 	if err := encdec.FromBytes(kv.encoding, kv.value, value); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (kv keyValue) Lease() kvstore.Lease {
+func (kv *keyValue) Lease() kvstore.Lease {
 	return kv.lease
 }
 
-func (kv keyValue) Event() *kvstore.Event {
-	return kv.event
-}
-
-func (kv keyValue) TTL() int {
+func (kv *keyValue) TTL() int {
 	if kv.lease == nil {
 		return 0
 	}
 	return kv.lease.TTL()
 }
 
-func (kv keyValue) SetLease(lease kvstore.Lease) error {
+func (kv *keyValue) Event() *kvstore.Event {
+	return kv.event
+}
+
+func (kv *keyValue) Encoding() string {
+	return kv.encoding
+}
+
+func (kv *keyValue) SetLease(lease kvstore.Lease) error {
 	kv.lease = lease
 	return nil
 }
 
-func (kv keyValue) SetTTL(ttl int) error {
+func (kv *keyValue) SetTTL(ttl int) error {
 	return kvstore.ErrNotSupported
 }
 
-func (kv keyValue) SetEncoding(encoding string) error {
+func (kv *keyValue) SetEncoding(encoding string) error {
 	if err := encdec.Registered(encoding); err != nil {
 		return err
 	}

@@ -25,7 +25,7 @@ func (w *watch) AddHandler(handler kvstore.WatchHandler) kvstore.Watch {
 func (w *watch) Start() error {
 	for resp := range w.ch {
 		for _, event := range resp.Events {
-			kv := keyValue{key: string(event.Kv.Key), value: kvstore.Value(event.Kv.Value)}
+			kv := &keyValue{key: string(event.Kv.Key), value: kvstore.Value(event.Kv.Value)}
 			if event.IsCreate() {
 				kv.event = &kvstore.Event{Type: kvstore.EventTypeCreate}
 			} else if event.IsModify() {
