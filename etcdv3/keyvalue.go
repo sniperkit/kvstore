@@ -1,16 +1,18 @@
 package etcdv3
 
 import (
+	"github.com/mickep76/encdec"
 	"github.com/mickep76/kvstore"
 )
 
 type keyValue struct {
-	key   string
-	lease kvstore.Lease
-	ttl   int
-	prev  kvstore.Value
-	value kvstore.Value
-	event *kvstore.Event
+	key      string
+	lease    kvstore.Lease
+	ttl      int
+	prev     kvstore.Value
+	value    kvstore.Value
+	event    *kvstore.Event
+	encoding string
 }
 
 type keyValues []*keyValue
@@ -43,4 +45,12 @@ func (kv keyValue) SetLease(lease kvstore.Lease) error {
 
 func (kv keyValue) SetTTL(ttl int) error {
 	return kvstore.ErrNotSupported
+}
+
+func (kv keyValue) SetEncoding(encoding string) error {
+	if err := encdec.Registered(encoding); err != nil {
+		return err
+	}
+	kv.encoding = encoding
+	return nil
 }

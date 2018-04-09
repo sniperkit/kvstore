@@ -27,6 +27,7 @@ Options:
   --endpoints=<endpoints>               Comma-delimited list of hosts in the key/value store cluster. [default: 127.0.0.1:2379]
   --timeout=<seconds>                   Connection timeout for key/value cluster in seconds. [default: 5]
   --keepalive=<seconds>                 Connection keepalive for key/value cluster in seconds. [default: 60]
+  --bind=<address>                      Bind to address. [default: 0.0.0.0:8080]
 `
 
 	// Parse arguments.
@@ -56,5 +57,22 @@ Options:
 		log.Fatal(err)
 	}
 
-	// Create watch for new hosts.
+	// Create host watch.
+	go func() {
+		if err := kvc.Watch(fmt.Sprintf("%s/%s", prefix, "hosts")).AddHandler(hostHandler).Start(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	// Create new router.
+	router := mux.NewRouter()
+
+	// Host handlers.
+	router.Handle("/api/hosts", AllHosts).Methods("GET")
+
+	// Start https listener.
+	logr := handlers.LoggingHandler(os.Stdout, router)
+	if err := http.ListenAndServeTLS(args["--bind"].(string), args["--cert"].(string), args["--key"].(string), logr); err != nil {
+		log.Fatal("https listener:", err)
+	}
 }

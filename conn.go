@@ -60,6 +60,7 @@ func Password(password string) func(Driver) error {
 	}
 }
 
+// TODO: rename WithLease
 // OpLease for key/value.
 func OpLease(lease Lease) func(KeyValue) error {
 	return func(kv KeyValue) error {
@@ -67,9 +68,17 @@ func OpLease(lease Lease) func(KeyValue) error {
 	}
 }
 
+// TODO: rename WithTTL
 // OpTTL for key/value.
 func OpTTL(ttl int) func(KeyValue) error {
 	return func(kv KeyValue) error {
 		return kv.SetTTL(ttl)
+	}
+}
+
+// WithEncoding encode value.
+func WithEncoding(encoding string) func(KeyValue) error {
+	return func(kv KeyValue) error {
+		return kv.SetEncoding(encoding)
 	}
 }
