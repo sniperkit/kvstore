@@ -18,7 +18,10 @@ var clientHandler = kvstore.WatchHandler(func(kv kvstore.KeyValue) {
 
 	c := &models.Client{}
 	kv.SetEncoding("json")
-	kv.Decode(c)
+	if err := kv.Decode(c); err != nil {
+		log.Print(err)
+		return
+	}
 
 	log.Printf("client hostname: %s", c.Hostname)
 })

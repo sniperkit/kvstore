@@ -30,6 +30,10 @@ func (kv *keyValue) Value() kvstore.Value {
 }
 
 func (kv *keyValue) Decode(value interface{}) error {
+	if kv.value == nil {
+		return kvstore.ErrEmptyValue
+	}
+
 	if err := encdec.FromBytes(kv.encoding, kv.value, value); err != nil {
 		return err
 	}
