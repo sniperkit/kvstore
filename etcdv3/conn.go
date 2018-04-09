@@ -2,12 +2,12 @@ package etcdv3
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/mickep76/kvstore"
 
 	"github.com/coreos/etcd/clientv3"
+	"github.com/mickep76/encdec"
 )
 
 type conn struct {
@@ -48,14 +48,28 @@ func (c *conn) Set(key string, value interface{}, options ...func(kvstore.KeyVal
 	//		opts = append(opts, clientv3.WithLease(kv.lease.(*lease).id))
 	//	}
 
-	b, err := json.Marshal(value)
-	if err != nil {
-		return fmt.Errorf("marshal value [%+v] for key [%s]: %v", value, key, err)
-	}
-
 	kvc := clientv3.NewKV(c.client)
-	if _, err := kvc.Put(context.TODO(), key, string(b), opts...); err != nil {
-		return fmt.Errorf("set key [%s]: %v", key, err)
+
+	// Check type
+	if kv.encoding == "" {
+		switch value.(type) {
+		case string:
+		default:
+			return fmt.Errorf("set key [%s] value needs to be a string unless encoding is enabled", key)
+		}
+
+		if _, err := kvc.Put(context.TODO(), key, value.(string), opts...); err != nil {
+			return fmt.Errorf("set key [%s]: %v", key, err)
+		}
+	} else {
+		b, err := encdec.ToBytes(kv.encoding, value)
+		if err != nil {
+			return err
+		}
+
+		if _, err := kvc.Put(context.TODO(), key, string(b), opts...); err != nil {
+			return fmt.Errorf("set key [%s]: %v", key, err)
+		}
 	}
 	return nil
 }
