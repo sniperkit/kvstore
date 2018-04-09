@@ -18,11 +18,3 @@ type KeyValue interface {
 
 // KeyValues multiple key/values.
 type KeyValues []KeyValue
-
-// MarshalJSON for key/value.
-func (m Value) MarshalJSON() ([]byte, error) {
-	if m == nil {
-		return []byte("null"), nil
-	}
-	return m, nil
-}
