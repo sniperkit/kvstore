@@ -87,12 +87,14 @@ Options:
 	prefix = args["--prefix"].(string)
 
 	// Connect to etcd.
+	log.Printf("connect to etcd")
 	kvc, err = kvstore.Open("etcdv3", strings.Split(args["--endpoints"].(string), ","), kvstore.Timeout(timeout))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Create host watch.
+	// Create client watch.
+	log.Printf("create client watch")
 	go func() {
 		if err := kvc.Watch(fmt.Sprintf("%s/%s", prefix, "clients")).AddHandler(clientHandler).Start(); err != nil {
 			log.Fatal(err)
@@ -100,12 +102,15 @@ Options:
 	}()
 
 	// Create new router.
+	log.Printf("create http router")
 	router := mux.NewRouter()
 
 	// Host handlers.
+	log.Printf("add route /api/clients")
 	router.Handle("/api/clients", clientAll).Methods("GET")
 
 	// Start https listener.
+	log.Printf("start http listener")
 	logr := handlers.LoggingHandler(os.Stdout, router)
 	if err := http.ListenAndServe(args["--bind"].(string), logr); err != nil {
 		log.Fatal("http listener:", err)
