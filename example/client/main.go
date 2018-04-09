@@ -10,12 +10,9 @@ import (
 	"github.com/docopt/docopt-go"
 	"github.com/mickep76/kvstore"
 	_ "github.com/mickep76/kvstore/etcdv3"
+
 	"github.com/mickep76/kvstore/example/models"
 )
-
-type Host struct {
-	Hostname string `json:"hostname"`
-}
 
 func main() {
 	usage := `client
@@ -70,12 +67,10 @@ Options:
 
 	// Host struct.
 	hostname, _ := os.Hostname()
-	host := &models.Host{
-		Hostname: hostname,
-	}
+	h := models.NewHost(hostname)
 
 	// Create host.
-	if err := kvc.Set(fmt.Sprintf("%s/hosts/%h", prefix, hostname), host, kvstore.OpLease(lease)); err != nil {
+	if err := kvc.Set(fmt.Sprintf("%s/clients/%h", prefix, h.UUID), h, kvstore.WithEncoding("json"), kvstore.WithLease(lease)); err != nil {
 		log.Fatal(err)
 	}
 
