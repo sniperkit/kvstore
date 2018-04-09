@@ -70,11 +70,11 @@ Options:
 	// Create new host struct.
 	log.Printf("create new host struct")
 	hostname, _ := os.Hostname()
-	h := models.NewHost(hostname)
+	c := models.NewClient(hostname)
 
 	// Set client in etcd.
 	log.Printf("set client in etcd")
-	if err := kvc.Set(fmt.Sprintf("%s/clients/%s", prefix, h.UUID), h, kvstore.WithEncoding("json"), kvstore.WithLease(lease)); err != nil {
+	if err := kvc.Set(fmt.Sprintf("%s/clients/%s", prefix, c.UUID), c, kvstore.WithEncoding("json"), kvstore.WithLease(lease)); err != nil {
 		log.Fatal(err)
 	}
 

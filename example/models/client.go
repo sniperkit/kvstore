@@ -6,14 +6,14 @@ import (
 	"github.com/pborman/uuid"
 )
 
-type Host struct {
+type Client struct {
 	UUID     string    `json:"uuid"`
 	Created  time.Time `json:"created"`
 	Hostname string    `json:"hostname"`
 }
 
-func NewHost(hostname string) *Host {
-	return &Host{
+func NewClient(hostname string) *Client {
+	return &Client{
 		UUID:     uuid.New(),
 		Created:  time.Now(),
 		Hostname: hostname,
