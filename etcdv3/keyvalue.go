@@ -1,8 +1,12 @@
 package etcdv3
 
 import (
-	"github.com/mickep76/encdec"
 	"github.com/mickep76/kvstore"
+
+	"github.com/mickep76/encdec"
+	_ "github.com/mickep76/encdec/json"
+	_ "github.com/mickep76/encdec/toml"
+	_ "github.com/mickep76/encdec/yaml"
 )
 
 type keyValue struct {
@@ -34,7 +38,9 @@ func (kv keyValue) Event() *kvstore.Event {
 }
 
 func (kv keyValue) TTL() int {
-	// TODO: if no lease return 0
+	if kv.lease == nil {
+		return 0
+	}
 	return kv.lease.TTL()
 }
 
