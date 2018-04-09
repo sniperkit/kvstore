@@ -60,6 +60,13 @@ func Password(password string) func(Driver) error {
 	}
 }
 
+// Encoding used for entries.
+func Encoding(encoding string) func(Driver) error {
+	return func(d Driver) error {
+		return d.SetEncoding(encoding)
+	}
+}
+
 // WithLease for key/value.
 func WithLease(lease Lease) func(KeyValue) error {
 	return func(kv KeyValue) error {

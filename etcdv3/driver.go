@@ -8,9 +8,12 @@ import (
 	"github.com/mickep76/kvstore"
 
 	"github.com/coreos/etcd/clientv3"
+	"github.com/mickep76/encdec"
 )
 
 type driver struct {
+	encoding string
+
 	clientv3.Config
 }
 
@@ -34,6 +37,14 @@ func (d *driver) SetPassword(password string) error {
 	return nil
 }
 
+func (d *driver) SetEncoding(encoding string) error {
+	if err := encdec.Registered(encoding); err != nil {
+		return err
+	}
+	d.encoding = encoding
+	return nil
+}
+
 func (d *driver) Open(endpoints []string) (kvstore.Conn, error) {
 	d.Endpoints = endpoints
 
@@ -43,7 +54,8 @@ func (d *driver) Open(endpoints []string) (kvstore.Conn, error) {
 	}
 
 	return &conn{
-		client: c,
+		encoding: d.encoding,
+		client:   c,
 	}, nil
 }
 

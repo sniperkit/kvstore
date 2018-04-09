@@ -11,6 +11,8 @@ import (
 )
 
 type conn struct {
+	encoding string
+
 	client *clientv3.Client
 }
 
