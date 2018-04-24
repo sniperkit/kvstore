@@ -74,7 +74,7 @@ Options:
 
 	// Set client in etcd.
 	log.Printf("set client in etcd")
-	if err := kvc.Set(fmt.Sprintf("%s/clients/%s", prefix, c.UUID), c, kvstore.WithEncoding("json"), kvstore.WithLease(lease)); err != nil {
+	if err := kvc.Set(fmt.Sprintf("%s/clients/%s", prefix, c.UUID), c, kvstore.WithLease(lease)); err != nil {
 		log.Fatal(err)
 	}
 
