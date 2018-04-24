@@ -4,6 +4,9 @@ import "time"
 
 // Lease struct.
 type Lease interface {
+	// TTL for lease.
+	TTL() int
+
 	// Renew lease.
 	Renew() error
 

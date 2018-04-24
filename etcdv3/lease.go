@@ -17,6 +17,10 @@ type lease struct {
 	keepAlive *time.Ticker
 }
 
+func (l *lease) TTL() int {
+	return int(l.ttl)
+}
+
 func (l *lease) Renew() error {
 	if _, err := l.client.KeepAliveOnce(context.TODO(), l.id); err != nil {
 		return fmt.Errorf("renew lease: %v", err)

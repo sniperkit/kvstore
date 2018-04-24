@@ -10,6 +10,7 @@ type Driver interface {
 	SetTLS(config *tls.Config) error
 	SetUser(user string) error
 	SetPassword(password string) error
+	SetEncoding(encoding string) error
 	Open(endpoints []string) (Conn, error)
 }
 

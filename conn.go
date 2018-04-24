@@ -9,10 +9,10 @@ import (
 type Conn interface {
 	Close() error
 	Lease(ttl int) (Lease, error)
-	Set(key string, value interface{}) error
-	SetWithLease(key string, value interface{}, lease Lease) error
+	Set(key string, value interface{}, options ...func(KeyValue) error) error
 	Delete(key string) error
 	Keys(path string) ([]string, error)
+	//	Value(path string) (KeyValue, error)
 	Values(path string) (KeyValues, error)
 	Watch(path string) Watch
 }
@@ -33,30 +33,51 @@ func Open(driver string, endpoints []string, options ...func(Driver) error) (Con
 	return d.Open(endpoints)
 }
 
-// Timeout for database connection.
-func Timeout(timeout int) func(Driver) error {
+// WithTimeout for database connection.
+func WithTimeout(timeout int) func(Driver) error {
 	return func(d Driver) error {
 		return d.SetTimeout(timeout)
 	}
 }
 
-// TLS config for database connection.
-func TLS(config *tls.Config) func(Driver) error {
+// WithTLS config for database connection.
+func WithTLS(config *tls.Config) func(Driver) error {
 	return func(d Driver) error {
 		return d.SetTLS(config)
 	}
 }
 
-// User for database connection.
-func User(user string) func(Driver) error {
+// WithUser for database connection.
+func WithUser(user string) func(Driver) error {
 	return func(d Driver) error {
 		return d.SetUser(user)
 	}
 }
 
-// Password for database connection.
-func Password(password string) func(Driver) error {
+// WithPassword for database connection.
+func WithPassword(password string) func(Driver) error {
 	return func(d Driver) error {
 		return d.SetPassword(password)
+	}
+}
+
+// WithEncoding to encode values.
+func WithEncoding(encoding string) func(Driver) error {
+	return func(d Driver) error {
+		return d.SetEncoding(encoding)
+	}
+}
+
+// WithLease for key/value.
+func WithLease(lease Lease) func(KeyValue) error {
+	return func(kv KeyValue) error {
+		return kv.SetLease(lease)
+	}
+}
+
+// WithTTL for key/value.
+func WithTTL(ttl int) func(KeyValue) error {
+	return func(kv KeyValue) error {
+		return kv.SetTTL(ttl)
 	}
 }

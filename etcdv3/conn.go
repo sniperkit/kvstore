@@ -2,15 +2,17 @@ package etcdv3
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/mickep76/kvstore"
 
 	"github.com/coreos/etcd/clientv3"
+	"github.com/mickep76/encdec"
 )
 
 type conn struct {
+	encoding string
+
 	client *clientv3.Client
 }
 
@@ -35,29 +37,40 @@ func (c *conn) Lease(ttl int) (kvstore.Lease, error) {
 	}, nil
 }
 
-func (c *conn) Set(key string, value interface{}) error {
-	b, err := json.Marshal(value)
-	if err != nil {
-		return fmt.Errorf("marshal value [%+v] for key [%s]: %v", value, key, err)
+func (c *conn) Set(key string, value interface{}, options ...func(kvstore.KeyValue) error) error {
+	kv := &keyValue{}
+	for _, option := range options {
+		if err := option(kv); err != nil {
+			return err
+		}
+	}
+
+	opts := []clientv3.OpOption{}
+	if kv.lease != nil {
+		opts = append(opts, clientv3.WithLease(kv.lease.(*lease).id))
 	}
 
 	kvc := clientv3.NewKV(c.client)
-	if _, err := kvc.Put(context.TODO(), key, string(b)); err != nil {
-		return fmt.Errorf("set key [%s]: %v", key, err)
-	}
-	return nil
-}
 
-// TODO: pass lease as option to Set(key, value, opts...).
-func (c *conn) SetWithLease(key string, value interface{}, l kvstore.Lease) error {
-	b, err := json.Marshal(value)
-	if err != nil {
-		return fmt.Errorf("marshal value [%+v] for key [%s]: %v", value, key, err)
-	}
+	// Check type
+	if c.encoding == "" {
+		switch value.(type) {
+		case string:
+			if _, err := kvc.Put(context.TODO(), key, value.(string), opts...); err != nil {
+				return fmt.Errorf("set key [%s]: %v", key, err)
+			}
+		default:
+			return fmt.Errorf("set key [%s]: value needs to be a string unless encoding is enabled", key)
+		}
+	} else {
+		b, err := encdec.ToBytes(c.encoding, value)
+		if err != nil {
+			return err
+		}
 
-	kvc := clientv3.NewKV(c.client)
-	if _, err := kvc.Put(context.TODO(), key, string(b), clientv3.WithLease(l.(*lease).id)); err != nil {
-		return fmt.Errorf("set key [%s]: %v", key, err)
+		if _, err := kvc.Put(context.TODO(), key, string(b), opts...); err != nil {
+			return fmt.Errorf("set key [%s]: %v", key, err)
+		}
 	}
 	return nil
 }
@@ -93,7 +106,7 @@ func (c *conn) Values(key string) (kvstore.KeyValues, error) {
 	values := kvstore.KeyValues{}
 	for _, kv := range resp.Kvs {
 		// TODO: add TTL for lease, if leaseID is 0 set nil for no lease.
-		values = append(values, &kvstore.KeyValue{Key: string(kv.Key), Lease: &lease{id: clientv3.LeaseID(kv.Lease)}, Value: kvstore.Value(kv.Value)})
+		values = append(values, &keyValue{key: string(kv.Key), lease: &lease{id: clientv3.LeaseID(kv.Lease)}, value: kvstore.Value(kv.Value), encoding: c.encoding})
 	}
 
 	return values, nil
