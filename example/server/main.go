@@ -112,7 +112,7 @@ Options:
 
 	// Connect to etcd.
 	log.Printf("connect to etcd")
-	kvc, err = kvstore.Open("etcdv3", strings.Split(args["--endpoints"].(string), ","), kvstore.Timeout(timeout))
+	kvc, err = kvstore.Open("etcdv3", strings.Split(args["--endpoints"].(string), ","), kvstore.WithTimeout(timeout), kvstore.WithEncoding("json"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -131,7 +131,7 @@ Options:
 
 	// Set client in etcd.
 	log.Printf("set server in etcd")
-	if err := kvc.Set(fmt.Sprintf("%s/servers/%s", prefix, s.UUID), s, kvstore.WithEncoding("json"), kvstore.WithLease(lease)); err != nil {
+	if err := kvc.Set(fmt.Sprintf("%s/servers/%s", prefix, s.UUID), s, kvstore.WithLease(lease)); err != nil {
 		log.Fatal(err)
 	}
 

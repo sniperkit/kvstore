@@ -35,7 +35,6 @@ func ServerAll(kvc kvstore.Conn, prefix string) (Servers, error) {
 	servers := Servers{}
 	for _, kv := range kvs {
 		s := &Server{}
-		kv.SetEncoding("json")
 		if err := kv.Decode(s); err != nil {
 			return nil, err
 		}

@@ -53,7 +53,7 @@ func (c *conn) Set(key string, value interface{}, options ...func(kvstore.KeyVal
 	kvc := clientv3.NewKV(c.client)
 
 	// Check type
-	if kv.encoding == "" {
+	if c.encoding == "" {
 		switch value.(type) {
 		case string:
 			if _, err := kvc.Put(context.TODO(), key, value.(string), opts...); err != nil {
@@ -63,7 +63,7 @@ func (c *conn) Set(key string, value interface{}, options ...func(kvstore.KeyVal
 			return fmt.Errorf("set key [%s]: value needs to be a string unless encoding is enabled", key)
 		}
 	} else {
-		b, err := encdec.ToBytes(kv.encoding, value)
+		b, err := encdec.ToBytes(c.encoding, value)
 		if err != nil {
 			return err
 		}
@@ -106,7 +106,7 @@ func (c *conn) Values(key string) (kvstore.KeyValues, error) {
 	values := kvstore.KeyValues{}
 	for _, kv := range resp.Kvs {
 		// TODO: add TTL for lease, if leaseID is 0 set nil for no lease.
-		values = append(values, &keyValue{key: string(kv.Key), lease: &lease{id: clientv3.LeaseID(kv.Lease)}, value: kvstore.Value(kv.Value)})
+		values = append(values, &keyValue{key: string(kv.Key), lease: &lease{id: clientv3.LeaseID(kv.Lease)}, value: kvstore.Value(kv.Value), encoding: c.encoding})
 	}
 
 	return values, nil

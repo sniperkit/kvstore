@@ -55,7 +55,7 @@ Options:
 
 	// Connect to etcd.
 	log.Printf("connect to etcd")
-	kvc, err := kvstore.Open("etcdv3", strings.Split(args["--endpoints"].(string), ","), kvstore.Timeout(timeout))
+	kvc, err := kvstore.Open("etcdv3", strings.Split(args["--endpoints"].(string), ","), kvstore.WithTimeout(timeout), kvstore.WithEncoding("json"))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -33,7 +33,6 @@ func ClientAll(kvc kvstore.Conn, prefix string) (Clients, error) {
 	clients := Clients{}
 	for _, kv := range kvs {
 		c := &Client{}
-		kv.SetEncoding("json")
 		if err := kv.Decode(c); err != nil {
 			return nil, err
 		}
