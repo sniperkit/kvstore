@@ -9,6 +9,7 @@ type KeyValue interface {
 	Value() Value
 	PrevValue() Value
 	Decode(value interface{}) error
+	PrevDecode(value interface{}) error
 	Lease() Lease
 	TTL() int
 	Event() *Event

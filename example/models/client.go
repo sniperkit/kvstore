@@ -9,9 +9,10 @@ import (
 )
 
 type Client struct {
-	UUID     string    `json:"uuid"`
-	Created  time.Time `json:"created"`
-	Hostname string    `json:"hostname"`
+	UUID     string     `json:"uuid"`
+	Created  time.Time  `json:"created"`
+	Updated  *time.Time `json:"updated,omitempty"`
+	Hostname string     `json:"hostname"`
 }
 
 type Clients []*Client

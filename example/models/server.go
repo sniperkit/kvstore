@@ -9,10 +9,11 @@ import (
 )
 
 type Server struct {
-	UUID     string    `json:"uuid"`
-	Created  time.Time `json:"created"`
-	Hostname string    `json:"hostname"`
-	Bind     string    `json:"bind"`
+	UUID     string     `json:"uuid"`
+	Created  time.Time  `json:"created"`
+	Updated  *time.Time `json:"updated,omitempty"`
+	Hostname string     `json:"hostname"`
+	Bind     string     `json:"bind"`
 }
 
 type Servers []*Server

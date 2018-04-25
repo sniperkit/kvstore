@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -31,7 +30,17 @@ var clientHandler = kvstore.WatchHandler(func(kv kvstore.KeyValue) {
 		return
 	}
 
-	log.Printf("client created: %s uuid: %s hostname: %s", c.Created, c.UUID, c.Hostname)
+	log.Printf("client created: %s updated: %s uuid: %s hostname: %s", c.Created, c.Updated, c.UUID, c.Hostname)
+
+	if kv.Event().Type == kvstore.EventTypeModify {
+		pc := &models.Client{}
+		if err := kv.PrevDecode(pc); err != nil {
+			log.Print(err)
+			return
+		}
+
+		log.Printf("prev. client created: %s updated: %s value: %s uuid: %s hostname: %s", c.Created, c.Updated, c.UUID, c.Hostname)
+	}
 })
 
 func (h *Handler) allClients(w http.ResponseWriter, r *http.Request) {
@@ -112,7 +121,7 @@ func main() {
 	// Create client watch.
 	log.Printf("create client watch")
 	go func() {
-		if err := ds.Watch(fmt.Sprintf("%s/%s", prefix, "clients")).AddHandler(clientHandler).Start(); err != nil {
+		if err := ds.Watch("clients").AddHandler(clientHandler).Start(); err != nil {
 			log.Fatal(err)
 		}
 	}()

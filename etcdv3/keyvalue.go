@@ -44,6 +44,17 @@ func (kv *keyValue) Decode(value interface{}) error {
 	return nil
 }
 
+func (kv *keyValue) PrevDecode(value interface{}) error {
+	if kv.prevValue == nil {
+		return kvstore.ErrEmptyValue
+	}
+
+	if err := encdec.FromBytes(kv.encoding, kv.prevValue, value); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (kv *keyValue) Lease() kvstore.Lease {
 	return kv.lease
 }
