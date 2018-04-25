@@ -110,7 +110,7 @@ Options:
 
 	// Connect to etcd.
 	log.Printf("connect to etcd")
-	ds, err := models.NewDatastore("etcdv3", strings.Split(args["--endpoints"].(string), ","), prefix, keepalive, kvstore.WithTimeout(timeout), kvstore.WithEncoding("json"))
+	ds, err := models.NewDatastore("etcdv3", strings.Split(args["--endpoints"].(string), ","), keepalive, kvstore.WithTimeout(timeout), kvstore.WithEncoding("json"), kvstore.WithPrefix(prefix))
 	if err != nil {
 		log.Fatal(err)
 	}

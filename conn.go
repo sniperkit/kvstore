@@ -68,6 +68,13 @@ func WithEncoding(encoding string) func(Driver) error {
 	}
 }
 
+// WithPrefix prefix pre+pended to key path.
+func WithPrefix(prefix string) func(Driver) error {
+	return func(d Driver) error {
+		return d.SetPrefix(prefix)
+	}
+}
+
 // WithLease for key/value.
 func WithLease(lease Lease) func(KeyValue) error {
 	return func(kv KeyValue) error {

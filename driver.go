@@ -11,6 +11,7 @@ type Driver interface {
 	SetUser(user string) error
 	SetPassword(password string) error
 	SetEncoding(encoding string) error
+	SetPrefix(prefix string) error
 	Open(endpoints []string) (Conn, error)
 }
 

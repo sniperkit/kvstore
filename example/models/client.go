@@ -25,7 +25,7 @@ func NewClient(hostname string) *Client {
 }
 
 func (ds *datastore) AllClients() (Clients, error) {
-	kvs, err := ds.Values(fmt.Sprintf("%s/%s", ds.prefix, "clients"))
+	kvs, err := ds.Values("clients")
 	if err != nil {
 		return nil, err
 	}
@@ -44,5 +44,5 @@ func (ds *datastore) AllClients() (Clients, error) {
 }
 
 func (ds *datastore) CreateClient(client *Client) error {
-	return ds.Set(fmt.Sprintf("%s/clients/%s", ds.prefix, client.UUID), client, kvstore.WithLease(ds.lease))
+	return ds.Set(fmt.Sprintf("clients/%s", client.UUID), client, kvstore.WithLease(ds.lease))
 }

@@ -13,12 +13,11 @@ type Datastore interface {
 }
 
 type datastore struct {
-	prefix string
-	lease  kvstore.Lease
+	lease kvstore.Lease
 	kvstore.Conn
 }
 
-func NewDatastore(driver string, endpoints []string, prefix string, keepalive int, options ...func(kvstore.Driver) error) (*datastore, error) {
+func NewDatastore(driver string, endpoints []string, keepalive int, options ...func(kvstore.Driver) error) (*datastore, error) {
 	c, err := kvstore.Open(driver, endpoints, options...)
 	if err != nil {
 		return nil, err
@@ -30,9 +29,8 @@ func NewDatastore(driver string, endpoints []string, prefix string, keepalive in
 	}
 
 	return &datastore{
-		prefix: prefix,
-		lease:  l,
-		Conn:   c,
+		lease: l,
+		Conn:  c,
 	}, nil
 }
 

@@ -3,6 +3,7 @@ package etcdv3
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	"github.com/mickep76/kvstore"
 
@@ -12,6 +13,7 @@ import (
 
 type conn struct {
 	encoding string
+	prefix   string
 
 	client *clientv3.Client
 }
@@ -56,7 +58,7 @@ func (c *conn) Set(key string, value interface{}, options ...func(kvstore.KeyVal
 	if c.encoding == "" {
 		switch value.(type) {
 		case string:
-			if _, err := kvc.Put(context.TODO(), key, value.(string), opts...); err != nil {
+			if _, err := kvc.Put(context.TODO(), filepath.Join(c.prefix, key), value.(string), opts...); err != nil {
 				return fmt.Errorf("set key [%s]: %v", key, err)
 			}
 		default:
@@ -68,7 +70,7 @@ func (c *conn) Set(key string, value interface{}, options ...func(kvstore.KeyVal
 			return err
 		}
 
-		if _, err := kvc.Put(context.TODO(), key, string(b), opts...); err != nil {
+		if _, err := kvc.Put(context.TODO(), filepath.Join(c.prefix, key), string(b), opts...); err != nil {
 			return fmt.Errorf("set key [%s]: %v", key, err)
 		}
 	}
@@ -84,7 +86,7 @@ func (c *conn) Delete(key string) error {
 }
 
 func (c *conn) Keys(path string) ([]string, error) {
-	resp, err := c.client.Get(context.TODO(), path, clientv3.WithPrefix(), clientv3.WithKeysOnly())
+	resp, err := c.client.Get(context.TODO(), filepath.Join(c.prefix, path), clientv3.WithPrefix(), clientv3.WithKeysOnly())
 	if err != nil {
 		return nil, fmt.Errorf("keys: %v", err)
 	}
@@ -97,8 +99,8 @@ func (c *conn) Keys(path string) ([]string, error) {
 	return keys, nil
 }
 
-func (c *conn) Values(key string) (kvstore.KeyValues, error) {
-	resp, err := c.client.Get(context.TODO(), key, clientv3.WithPrefix())
+func (c *conn) Values(path string) (kvstore.KeyValues, error) {
+	resp, err := c.client.Get(context.TODO(), filepath.Join(c.prefix, path), clientv3.WithPrefix())
 	if err != nil {
 		return nil, fmt.Errorf("values: %v", err)
 	}
@@ -115,6 +117,6 @@ func (c *conn) Values(key string) (kvstore.KeyValues, error) {
 func (c *conn) Watch(path string) kvstore.Watch {
 	return &watch{
 		handlers: kvstore.WatchHandlers{},
-		ch:       c.client.Watch(context.Background(), path, clientv3.WithPrefix()),
+		ch:       c.client.Watch(context.Background(), filepath.Join(c.prefix, path), clientv3.WithPrefix()),
 	}
 }

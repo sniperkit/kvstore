@@ -13,6 +13,7 @@ import (
 
 type driver struct {
 	encoding string
+	prefix   string
 
 	clientv3.Config
 }
@@ -45,6 +46,11 @@ func (d *driver) SetEncoding(encoding string) error {
 	return nil
 }
 
+func (d *driver) SetPrefix(prefix string) error {
+	d.prefix = prefix
+	return nil
+}
+
 func (d *driver) Open(endpoints []string) (kvstore.Conn, error) {
 	d.Endpoints = endpoints
 
@@ -55,6 +61,7 @@ func (d *driver) Open(endpoints []string) (kvstore.Conn, error) {
 
 	return &conn{
 		encoding: d.encoding,
+		prefix:   d.prefix,
 		client:   c,
 	}, nil
 }
