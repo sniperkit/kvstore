@@ -24,8 +24,8 @@ func NewClient(hostname string) *Client {
 	}
 }
 
-func ClientAll(kvc kvstore.Conn, prefix string) (Clients, error) {
-	kvs, err := kvc.Values(fmt.Sprintf("%s/%s", prefix, "clients"))
+func (ds *datastore) AllClients() (Clients, error) {
+	kvs, err := ds.Values(fmt.Sprintf("%s/%s", ds.prefix, "clients"))
 	if err != nil {
 		return nil, err
 	}
@@ -41,4 +41,8 @@ func ClientAll(kvc kvstore.Conn, prefix string) (Clients, error) {
 	}
 
 	return clients, nil
+}
+
+func (ds *datastore) CreateClient(client *Client) error {
+	return ds.Set(fmt.Sprintf("%s/clients/%s", ds.prefix, client.UUID), client, kvstore.WithLease(ds.lease))
 }

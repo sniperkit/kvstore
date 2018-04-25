@@ -26,8 +26,8 @@ func NewServer(hostname string, bind string) *Server {
 	}
 }
 
-func ServerAll(kvc kvstore.Conn, prefix string) (Servers, error) {
-	kvs, err := kvc.Values(fmt.Sprintf("%s/%s", prefix, "servers"))
+func (ds *datastore) AllServers() (Servers, error) {
+	kvs, err := ds.Values(fmt.Sprintf("%s/%s", ds.prefix, "servers"))
 	if err != nil {
 		return nil, err
 	}
@@ -43,4 +43,8 @@ func ServerAll(kvc kvstore.Conn, prefix string) (Servers, error) {
 	}
 
 	return servers, nil
+}
+
+func (ds *datastore) CreateServer(server *Server) error {
+	return ds.Set(fmt.Sprintf("%s/servers/%s", ds.prefix, server.UUID), server, kvstore.WithLease(ds.lease))
 }

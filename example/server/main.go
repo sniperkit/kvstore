@@ -18,16 +18,14 @@ import (
 	"github.com/mickep76/kvstore/example/models"
 )
 
-var (
-	kvc    kvstore.Conn
-	prefix string
-)
+type Handler struct {
+	ds models.Datastore
+}
 
 var clientHandler = kvstore.WatchHandler(func(kv kvstore.KeyValue) {
 	log.Printf("client event: %s key: %s", kv.Event().Type, kv.Key())
 
 	c := &models.Client{}
-	kv.SetEncoding("json")
 	if err := kv.Decode(c); err != nil {
 		log.Print(err)
 		return
@@ -36,8 +34,8 @@ var clientHandler = kvstore.WatchHandler(func(kv kvstore.KeyValue) {
 	log.Printf("client created: %s uuid: %s hostname: %s", c.Created, c.UUID, c.Hostname)
 })
 
-var clientAll = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	v, err := models.ClientAll(kvc, prefix)
+func (h *Handler) allClients(w http.ResponseWriter, r *http.Request) {
+	v, err := h.ds.AllClients()
 	if err != nil {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -51,10 +49,10 @@ var clientAll = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	b, _ = json.MarshalIndent(v, "", "  ")
 
 	w.Write(b)
-})
+}
 
-var serverAll = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	v, err := models.ServerAll(kvc, prefix)
+func (h *Handler) allServers(w http.ResponseWriter, r *http.Request) {
+	v, err := h.ds.AllServers()
 	if err != nil {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -68,7 +66,7 @@ var serverAll = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	b, _ = json.MarshalIndent(v, "", "  ")
 
 	w.Write(b)
-})
+}
 
 func main() {
 	usage := `client
@@ -108,18 +106,11 @@ Options:
 	}
 
 	// Get prefix.
-	prefix = args["--prefix"].(string)
+	prefix := args["--prefix"].(string)
 
 	// Connect to etcd.
 	log.Printf("connect to etcd")
-	kvc, err = kvstore.Open("etcdv3", strings.Split(args["--endpoints"].(string), ","), kvstore.WithTimeout(timeout), kvstore.WithEncoding("json"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Create lease.
-	log.Printf("create lease")
-	lease, err := kvc.Lease(keepalive)
+	ds, err := models.NewDatastore("etcdv3", strings.Split(args["--endpoints"].(string), ","), prefix, keepalive, kvstore.WithTimeout(timeout), kvstore.WithEncoding("json"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -130,14 +121,14 @@ Options:
 	s := models.NewServer(hostname, args["--bind"].(string))
 
 	// Set client in etcd.
-	log.Printf("set server in etcd")
-	if err := kvc.Set(fmt.Sprintf("%s/servers/%s", prefix, s.UUID), s, kvstore.WithLease(lease)); err != nil {
+	log.Printf("create server in etcd")
+	if err := ds.CreateServer(s); err != nil {
 		log.Fatal(err)
 	}
 
 	// Create lease keepalive.
 	log.Printf("create lease keepalive")
-	ch, err := lease.KeepAlive()
+	ch, err := ds.Lease().KeepAlive()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -155,7 +146,7 @@ Options:
 	// Create client watch.
 	log.Printf("create client watch")
 	go func() {
-		if err := kvc.Watch(fmt.Sprintf("%s/%s", prefix, "clients")).AddHandler(clientHandler).Start(); err != nil {
+		if err := ds.Watch(fmt.Sprintf("%s/%s", prefix, "clients")).AddHandler(clientHandler).Start(); err != nil {
 			log.Fatal(err)
 		}
 	}()
@@ -163,14 +154,15 @@ Options:
 	// Create new router.
 	log.Printf("create http router")
 	router := mux.NewRouter()
+	h := &Handler{ds: ds}
 
 	// Client handlers.
 	log.Printf("add route /api/clients")
-	router.Handle("/api/clients", clientAll).Methods("GET")
+	router.HandleFunc("/api/clients", h.allClients).Methods("GET")
 
 	// Server handlers.
 	log.Printf("add route /api/servers")
-	router.Handle("/api/servers", serverAll).Methods("GET")
+	router.HandleFunc("/api/servers", h.allServers).Methods("GET")
 
 	// Start https listener.
 	log.Printf("start http listener")

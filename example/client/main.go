@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -55,14 +54,7 @@ Options:
 
 	// Connect to etcd.
 	log.Printf("connect to etcd")
-	kvc, err := kvstore.Open("etcdv3", strings.Split(args["--endpoints"].(string), ","), kvstore.WithTimeout(timeout), kvstore.WithEncoding("json"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Create lease.
-	log.Printf("create lease")
-	lease, err := kvc.Lease(keepalive)
+	ds, err := models.NewDatastore("etcdv3", strings.Split(args["--endpoints"].(string), ","), prefix, keepalive, kvstore.WithTimeout(timeout), kvstore.WithEncoding("json"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -73,14 +65,14 @@ Options:
 	c := models.NewClient(hostname)
 
 	// Set client in etcd.
-	log.Printf("set client in etcd")
-	if err := kvc.Set(fmt.Sprintf("%s/clients/%s", prefix, c.UUID), c, kvstore.WithLease(lease)); err != nil {
+	log.Printf("create client in etcd")
+	if err := ds.CreateClient(c); err != nil {
 		log.Fatal(err)
 	}
 
 	// Create lease keepalive.
 	log.Printf("create lease keepalive")
-	ch, err := lease.KeepAlive()
+	ch, err := ds.Lease().KeepAlive()
 	if err != nil {
 		log.Fatal(err)
 	}
