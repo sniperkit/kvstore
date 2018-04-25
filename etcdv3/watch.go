@@ -7,6 +7,7 @@ import (
 )
 
 type watch struct {
+	encoding string
 	filter   *kvstore.EventType
 	handlers kvstore.WatchHandlers
 	ch       clientv3.WatchChan
@@ -25,7 +26,7 @@ func (w *watch) AddHandler(handler kvstore.WatchHandler) kvstore.Watch {
 func (w *watch) Start() error {
 	for resp := range w.ch {
 		for _, event := range resp.Events {
-			kv := &keyValue{key: string(event.Kv.Key), value: kvstore.Value(event.Kv.Value)}
+			kv := &keyValue{encoding: w.encoding, key: string(event.Kv.Key), value: kvstore.Value(event.Kv.Value)}
 			if event.IsCreate() {
 				kv.event = &kvstore.Event{Type: kvstore.EventTypeCreate}
 			} else if event.IsModify() {

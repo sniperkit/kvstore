@@ -116,6 +116,7 @@ func (c *conn) Values(path string) (kvstore.KeyValues, error) {
 
 func (c *conn) Watch(path string) kvstore.Watch {
 	return &watch{
+		encoding: c.encoding,
 		handlers: kvstore.WatchHandlers{},
 		ch:       c.client.Watch(context.Background(), filepath.Join(c.prefix, path), clientv3.WithPrefix()),
 	}
