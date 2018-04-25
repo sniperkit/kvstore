@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,6 +11,8 @@ import (
 	"github.com/docopt/docopt-go"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/mickep76/encdec"
+	_ "github.com/mickep76/encdec/json"
 	"github.com/mickep76/kvstore"
 	_ "github.com/mickep76/kvstore/etcdv3"
 
@@ -45,9 +46,7 @@ func (h *Handler) allClients(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 
-	var b []byte
-	b, _ = json.MarshalIndent(v, "", "  ")
-
+	b, _ := encdec.ToBytes("json", v, encdec.WithIndent("  "))
 	w.Write(b)
 }
 
@@ -62,9 +61,7 @@ func (h *Handler) allServers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 
-	var b []byte
-	b, _ = json.MarshalIndent(v, "", "  ")
-
+	b, _ := encdec.ToBytes("json", v, encdec.WithIndent("  "))
 	w.Write(b)
 }
 
