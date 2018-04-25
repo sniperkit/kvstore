@@ -47,3 +47,9 @@ func (ds *datastore) AllClients() (Clients, error) {
 func (ds *datastore) CreateClient(client *Client) error {
 	return ds.Set(fmt.Sprintf("clients/%s", client.UUID), client, kvstore.WithLease(ds.lease))
 }
+
+func (ds *datastore) UpdateClient(client *Client) error {
+	now := time.Now()
+	client.Updated = &now
+	return ds.Set(fmt.Sprintf("clients/%s", client.UUID), client, kvstore.WithLease(ds.lease))
+}

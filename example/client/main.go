@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/mickep76/kvstore"
 	_ "github.com/mickep76/kvstore/etcdv3"
@@ -38,6 +39,17 @@ func main() {
 	if err := ds.CreateClient(c); err != nil {
 		log.Fatal(err)
 	}
+
+	// Update client in etcd every 5 seconds.
+	timer := time.NewTimer(5 * time.Second)
+	go func() {
+		<-timer.C
+
+		log.Printf("update client in etcd")
+		if err := ds.UpdateClient(c); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	// Create lease keepalive.
 	log.Printf("create lease keepalive")
