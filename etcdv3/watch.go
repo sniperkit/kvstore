@@ -30,6 +30,7 @@ func (w *watch) Start() error {
 				kv.event = &kvstore.Event{Type: kvstore.EventTypeCreate}
 			} else if event.IsModify() {
 				kv.event = &kvstore.Event{Type: kvstore.EventTypeModify}
+				kv.prevValue = kvstore.Value(event.PrevKv.Value)
 			} else {
 				kv.event = &kvstore.Event{Type: kvstore.EventTypeDelete}
 			}

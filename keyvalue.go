@@ -7,6 +7,7 @@ type Value []byte
 type KeyValue interface {
 	Key() string
 	Value() Value
+	PrevValue() Value
 	Decode(value interface{}) error
 	Lease() Lease
 	TTL() int

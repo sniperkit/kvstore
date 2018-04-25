@@ -10,13 +10,13 @@ import (
 )
 
 type keyValue struct {
-	key      string
-	lease    kvstore.Lease
-	ttl      int
-	prev     kvstore.Value
-	value    kvstore.Value
-	event    *kvstore.Event
-	encoding string
+	key       string
+	lease     kvstore.Lease
+	ttl       int
+	prevValue kvstore.Value
+	value     kvstore.Value
+	event     *kvstore.Event
+	encoding  string
 }
 
 type keyValues []*keyValue
@@ -27,6 +27,10 @@ func (kv *keyValue) Key() string {
 
 func (kv *keyValue) Value() kvstore.Value {
 	return kv.value
+}
+
+func (kv *keyValue) PrevValue() kvstore.Value {
+	return kv.prevValue
 }
 
 func (kv *keyValue) Decode(value interface{}) error {
