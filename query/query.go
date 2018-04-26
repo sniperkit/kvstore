@@ -186,3 +186,14 @@ func (q Queries) Re(v interface{}) Queries {
 	last.QueryMatch = &QueryMatch{Value: v}
 	return q
 }
+
+/*
+ * Evaluate Query
+ */
+
+func (q Queries) Match(a interface{}) (bool, error) {
+	//	for _, query := range q {
+	//	}
+
+	return false, nil
+}
