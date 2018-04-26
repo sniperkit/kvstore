@@ -29,19 +29,33 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Create new client model.
-	log.Printf("create new client model")
+	// Find existing client in datastore.
+	log.Printf("find existing client in datastore")
 	hostname, _ := os.Hostname()
-	c := models.NewClient(hostname)
-
-	// Create client in etcd.
-	log.Printf("create client in etcd")
-	if err := ds.CreateClient(c); err != nil {
+	c, err := ds.FindClient("Hostname", hostname)
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Update client in etcd every 5 seconds.
-	timer := time.NewTimer(5 * time.Second)
+	if c != nil {
+		// Update client in datastore.
+		log.Printf("update client in datastore")
+		if err := ds.UpdateClient(c); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		log.Printf("create new client")
+		c = models.NewClient(hostname)
+
+		// Create client in datastore.
+		log.Printf("create client in datastore")
+		if err := ds.CreateClient(c); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	// Update client in etcd after 10 seconds.
+	timer := time.NewTimer(10 * time.Second)
 	go func() {
 		<-timer.C
 

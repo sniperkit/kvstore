@@ -39,7 +39,7 @@ var clientHandler = kvstore.WatchHandler(func(kv kvstore.KeyValue) {
 			return
 		}
 
-		log.Printf("client prev. value: created: %s updated: %s value: %s uuid: %s hostname: %s", c.Created, c.Updated, c.UUID, c.Hostname)
+		log.Printf("client prev. value: created: %s updated: %s uuid: %s hostname: %s", c.Created, c.Updated, c.UUID, c.Hostname)
 	}
 })
 
@@ -90,15 +90,29 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Create new server model.
-	log.Printf("create new server model")
+	// Find existing server in datastore.
+	log.Printf("find existing server in datastore")
 	hostname, _ := os.Hostname()
-	s := models.NewServer(hostname, *bind)
-
-	// Set client in etcd.
-	log.Printf("create server in etcd")
-	if err := ds.CreateServer(s); err != nil {
+	s, err := ds.FindServer("Hostname", hostname)
+	if err != nil {
 		log.Fatal(err)
+	}
+
+	if s != nil {
+		// Update server in datastore.
+		log.Printf("update server in datastore")
+		if err := ds.UpdateServer(s); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		log.Printf("create new server")
+		s = models.NewServer(hostname, *bind)
+
+		// Create server in datastore.
+		log.Printf("create server in datastore")
+		if err := ds.CreateServer(s); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	// Create lease keepalive.

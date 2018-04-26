@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/mickep76/kvstore"
+	"github.com/mickep76/kvstore/query"
 	"github.com/pborman/uuid"
 )
 
@@ -46,6 +47,31 @@ func (ds *datastore) AllServers() (Servers, error) {
 	return servers, nil
 }
 
+func (ds *datastore) FindServer(field string, value interface{}) (*Server, error) {
+	servers, err := ds.AllServers()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, s := range servers {
+		v, err := query.GetFieldValue(s, field)
+		if err != nil {
+			return nil, err
+		}
+		if fmt.Sprint(value) == fmt.Sprint(v) {
+			return s, nil
+		}
+	}
+
+	return nil, nil
+}
+
 func (ds *datastore) CreateServer(server *Server) error {
+	return ds.Set(fmt.Sprintf("servers/%s", server.UUID), server, kvstore.WithLease(ds.lease))
+}
+
+func (ds *datastore) UpdateServer(server *Server) error {
+	now := time.Now()
+	server.Updated = &now
 	return ds.Set(fmt.Sprintf("servers/%s", server.UUID), server, kvstore.WithLease(ds.lease))
 }
