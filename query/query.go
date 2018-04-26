@@ -2,14 +2,16 @@ package query
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 )
 
 var (
-	ErrInvalidPtr   = errors.New("invalid ptr")
-	ErrNotAStruct   = errors.New("not a struct")
-	ErrUnknownField = errors.New("unknown field")
+	ErrInvalidPtr    = errors.New("invalid ptr")
+	ErrNotAStruct    = errors.New("not a struct")
+	ErrUnknownField  = errors.New("unknown field")
+	ErrDifferentKind = errors.New("different kind")
 )
 
 func resolvePtr(v reflect.Value) (reflect.Value, error) {
@@ -71,4 +73,36 @@ func GetFieldTagValue(v interface{}, field string, tag string) (interface{}, err
 	}
 
 	return nil, ErrUnknownField
+}
+
+func CmpEq(a, b interface{}) (bool, error) {
+	va, err := resolvePtr(reflect.ValueOf(a))
+	if err != nil {
+		return false, err
+	}
+
+	vb, err := resolvePtr(reflect.ValueOf(b))
+	if err != nil {
+		return false, err
+	}
+
+	if va.Kind() != vb.Kind() {
+		return false, ErrDifferentKind
+	}
+
+	return fmt.Sprint(va.Interface()) == fmt.Sprint(vb.Interface()), nil
+}
+
+func CmpNeq(a, b interface{}) (bool, error) {
+	m, err := CmpEq(a, b)
+	m = !m
+	return m, err
+}
+
+func CmpLt() (bool, error) {
+	return false, nil
+}
+
+func CmpGt() (bool, error) {
+	return CmpLt(b, a)
 }
