@@ -30,16 +30,16 @@ var clientHandler = kvstore.WatchHandler(func(kv kvstore.KeyValue) {
 		return
 	}
 
-	log.Printf("client created: %s updated: %s uuid: %s hostname: %s", c.Created, c.Updated, c.UUID, c.Hostname)
+	log.Printf("client value: created: %s updated: %s uuid: %s hostname: %s", c.Created, c.Updated, c.UUID, c.Hostname)
 
-	if kv.Event().Type == kvstore.EventTypeModify {
-		pc := &models.Client{}
-		if err := kv.PrevDecode(pc); err != nil {
+	if kv.PrevValue() != nil {
+		c := &models.Client{}
+		if err := kv.PrevDecode(c); err != nil {
 			log.Print(err)
 			return
 		}
 
-		log.Printf("prev. client created: %s updated: %s value: %s uuid: %s hostname: %s", c.Created, c.Updated, c.UUID, c.Hostname)
+		log.Printf("client prev. value: created: %s updated: %s value: %s uuid: %s hostname: %s", c.Created, c.Updated, c.UUID, c.Hostname)
 	}
 })
 

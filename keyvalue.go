@@ -16,7 +16,6 @@ type KeyValue interface {
 	Encoding() string
 	SetLease(lease Lease) error
 	SetTTL(ttl int) error
-	SetEncoding(encoding string) error
 }
 
 // KeyValues multiple key/values.

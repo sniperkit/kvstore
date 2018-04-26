@@ -13,8 +13,8 @@ type keyValue struct {
 	key       string
 	lease     kvstore.Lease
 	ttl       int
-	prevValue kvstore.Value
 	value     kvstore.Value
+	prevValue kvstore.Value
 	event     *kvstore.Event
 	encoding  string
 }
@@ -81,12 +81,4 @@ func (kv *keyValue) SetLease(lease kvstore.Lease) error {
 
 func (kv *keyValue) SetTTL(ttl int) error {
 	return kvstore.ErrNotSupported
-}
-
-func (kv *keyValue) SetEncoding(encoding string) error {
-	if err := encdec.Registered(encoding); err != nil {
-		return err
-	}
-	kv.encoding = encoding
-	return nil
 }

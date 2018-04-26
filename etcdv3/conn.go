@@ -118,6 +118,6 @@ func (c *conn) Watch(path string) kvstore.Watch {
 	return &watch{
 		encoding: c.encoding,
 		handlers: kvstore.WatchHandlers{},
-		ch:       c.client.Watch(context.Background(), filepath.Join(c.prefix, path), clientv3.WithPrefix()),
+		ch:       c.client.Watch(context.Background(), filepath.Join(c.prefix, path), clientv3.WithPrefix(), clientv3.WithPrevKV()),
 	}
 }

@@ -27,11 +27,15 @@ func (w *watch) Start() error {
 	for resp := range w.ch {
 		for _, event := range resp.Events {
 			kv := &keyValue{encoding: w.encoding, key: string(event.Kv.Key), value: kvstore.Value(event.Kv.Value)}
+
+			if event.PrevKv != nil {
+				kv.prevValue = kvstore.Value(event.PrevKv.Value)
+			}
+
 			if event.IsCreate() {
 				kv.event = &kvstore.Event{Type: kvstore.EventTypeCreate}
 			} else if event.IsModify() {
 				kv.event = &kvstore.Event{Type: kvstore.EventTypeModify}
-				kv.prevValue = kvstore.Value(event.PrevKv.Value)
 			} else {
 				kv.event = &kvstore.Event{Type: kvstore.EventTypeDelete}
 			}
