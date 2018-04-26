@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+// Add support for dot notation "field.sub-field".
+
 func resolvePtr(v reflect.Value) (reflect.Value, error) {
 	if v.Kind() == reflect.Ptr {
 		var err error
