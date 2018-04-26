@@ -54,7 +54,7 @@ func (ds *datastore) FindServer(field string, value interface{}) (*Server, error
 	}
 
 	for _, s := range servers {
-		v, err := query.GetFieldValue(s, field)
+		v, err := query.FieldValue(s, field)
 		if err != nil {
 			return nil, err
 		}

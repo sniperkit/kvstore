@@ -10,7 +10,7 @@ var (
 	ErrInvalidPtr       = errors.New("invalid ptr")
 	ErrNotAStruct       = errors.New("not a struct")
 	ErrUnknownField     = errors.New("unknown field")
-	ErrDifferentKind    = errors.New("different kind")
+	ErrNotSameKind      = errors.New("not same kind")
 	ErrKindNotSupported = errors.New("kind not supported")
 )
 
@@ -31,7 +31,7 @@ func resolvePtr(v reflect.Value) (reflect.Value, error) {
 	return v, nil
 }
 
-func GetFieldValue(v interface{}, field string) (interface{}, error) {
+func FieldValue(v interface{}, field string) (interface{}, error) {
 	s, err := resolvePtr(reflect.ValueOf(v))
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func GetFieldValue(v interface{}, field string) (interface{}, error) {
 	return f.Interface(), nil
 }
 
-func GetFieldTagValue(v interface{}, field string, tag string) (interface{}, error) {
+func FieldTagValue(v interface{}, field string, tag string) (interface{}, error) {
 	s, err := resolvePtr(reflect.ValueOf(v))
 	if err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func CmpEq(a, b interface{}) (bool, error) {
 	}
 
 	if va.Kind() != vb.Kind() {
-		return false, ErrDifferentKind
+		return false, ErrNotSameKind
 	}
 
 	switch va.Kind() {
@@ -141,7 +141,7 @@ func CmpLt(a, b interface{}) (bool, error) {
 	}
 
 	if va.Kind() != vb.Kind() {
-		return false, ErrDifferentKind
+		return false, ErrNotSameKind
 	}
 
 	switch va.Kind() {
@@ -190,7 +190,7 @@ func CmpLte(a, b interface{}) (bool, error) {
 	}
 
 	if va.Kind() != vb.Kind() {
-		return false, ErrDifferentKind
+		return false, ErrNotSameKind
 	}
 
 	switch va.Kind() {

@@ -52,7 +52,7 @@ func (ds *datastore) FindClient(field string, value interface{}) (*Client, error
 	}
 
 	for _, c := range clients {
-		v, err := query.GetFieldValue(c, field)
+		v, err := query.FieldValue(c, field)
 		if err != nil {
 			return nil, err
 		}
