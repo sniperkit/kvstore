@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/mickep76/kvstore"
-	"github.com/mickep76/kvstore/query"
+	"github.com/mickep76/kvstore/qry"
 	"github.com/pborman/uuid"
 )
 
@@ -46,19 +46,18 @@ func (ds *datastore) AllClients() (Clients, error) {
 }
 
 func (ds *datastore) FindClient(field string, value interface{}) (*Client, error) {
-	clients, err := ds.AllClients()
+	all, err := ds.AllClients()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, c := range clients {
-		v, err := query.FieldValue(c, field)
-		if err != nil {
-			return nil, err
-		}
-		if fmt.Sprint(value) == fmt.Sprint(v) {
-			return c, nil
-		}
+	r, err := qry.NewQuery(qry.EQ, field, value).Match(all)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(r) > 0 {
+		return r[0].(*Client), nil
 	}
 
 	return nil, nil

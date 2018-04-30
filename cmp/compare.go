@@ -1,20 +1,13 @@
-package query
+package cmp
 
 import (
 	"reflect"
 	"regexp"
 )
 
-func CmpEq(a, b interface{}) (bool, error) {
-	va, err := resolvePtr(reflect.ValueOf(a))
-	if err != nil {
-		return false, err
-	}
-
-	vb, err := resolvePtr(reflect.ValueOf(b))
-	if err != nil {
-		return false, err
-	}
+func Eq(a, b interface{}) (bool, error) {
+	va := reflect.Indirect(reflect.ValueOf(a))
+	vb := reflect.Indirect(reflect.ValueOf(b))
 
 	if va.Kind() != vb.Kind() {
 		return false, ErrNotSameKind
@@ -53,22 +46,15 @@ func CmpEq(a, b interface{}) (bool, error) {
 	return false, ErrKindNotSupported
 }
 
-func CmpNeq(a, b interface{}) (bool, error) {
-	m, err := CmpEq(a, b)
+func Neq(a, b interface{}) (bool, error) {
+	m, err := Eq(a, b)
 	m = !m
 	return m, err
 }
 
-func CmpLt(a, b interface{}) (bool, error) {
-	va, err := resolvePtr(reflect.ValueOf(a))
-	if err != nil {
-		return false, err
-	}
-
-	vb, err := resolvePtr(reflect.ValueOf(b))
-	if err != nil {
-		return false, err
-	}
+func Lt(a, b interface{}) (bool, error) {
+	va := reflect.Indirect(reflect.ValueOf(a))
+	vb := reflect.Indirect(reflect.ValueOf(b))
 
 	if va.Kind() != vb.Kind() {
 		return false, ErrNotSameKind
@@ -104,20 +90,13 @@ func CmpLt(a, b interface{}) (bool, error) {
 	return false, ErrKindNotSupported
 }
 
-func CmpGt(a, b interface{}) (bool, error) {
-	return CmpLt(b, a)
+func Gt(a, b interface{}) (bool, error) {
+	return Lt(b, a)
 }
 
-func CmpLte(a, b interface{}) (bool, error) {
-	va, err := resolvePtr(reflect.ValueOf(a))
-	if err != nil {
-		return false, err
-	}
-
-	vb, err := resolvePtr(reflect.ValueOf(b))
-	if err != nil {
-		return false, err
-	}
+func Lte(a, b interface{}) (bool, error) {
+	va := reflect.Indirect(reflect.ValueOf(a))
+	vb := reflect.Indirect(reflect.ValueOf(b))
 
 	if va.Kind() != vb.Kind() {
 		return false, ErrNotSameKind
@@ -153,20 +132,17 @@ func CmpLte(a, b interface{}) (bool, error) {
 	return false, ErrKindNotSupported
 }
 
-func CmpGte(a, b interface{}) (bool, error) {
-	return CmpLte(b, a)
+func Gte(a, b interface{}) (bool, error) {
+	return Lte(b, a)
 }
 
-func CmpRe(expr string, a interface{}) (bool, error) {
+func Re(expr string, a interface{}) (bool, error) {
 	re, err := regexp.Compile(expr)
 	if err != nil {
 		return false, err
 	}
 
-	va, err := resolvePtr(reflect.ValueOf(a))
-	if err != nil {
-		return false, err
-	}
+	va := reflect.Indirect(reflect.ValueOf(a))
 
 	switch va.Kind() {
 	case reflect.String:
@@ -174,38 +150,4 @@ func CmpRe(expr string, a interface{}) (bool, error) {
 	}
 
 	return false, ErrKindNotSupported
-}
-
-func CmpIn(a, b interface{}) (bool, error) {
-	va, err := resolvePtr(reflect.ValueOf(a))
-	if err != nil {
-		return false, err
-	}
-
-	vb, err := resolvePtr(reflect.ValueOf(b))
-	if err != nil {
-		return false, err
-	}
-
-	if va.Kind() != reflect.Array || va.Kind() != reflect.Slice {
-		return false, ErrKindNotSupported
-	}
-
-	va0 := reflect.ValueOf(a.([]interface{})[0])
-	if va0.Kind() != vb.Kind() {
-		return false, ErrNotSameKind
-	}
-
-	for _, i := range a.([]interface{}) {
-		m, err := CmpEq(i, b)
-		if err != nil {
-			return false, err
-		}
-
-		if m {
-			return true, nil
-		}
-	}
-
-	return false, nil
 }

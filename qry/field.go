@@ -1,38 +1,18 @@
-package query
+package qry
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 )
 
-// Add support for dot notation "field.sub-field".
-
-func resolvePtr(v reflect.Value) (reflect.Value, error) {
-	if v.Kind() == reflect.Ptr {
-		var err error
-
-		v, err = resolvePtr(v.Elem())
-		if err != nil {
-			return reflect.Value{}, err
-		}
-
-		if !v.IsValid() {
-			return reflect.Value{}, ErrInvalidPtr
-		}
-	}
-
-	return v, nil
-}
-
 func FieldValue(v interface{}, field string) (interface{}, error) {
-	s, err := resolvePtr(reflect.ValueOf(v))
-	if err != nil {
-		return nil, err
-	}
-
+	s := reflect.Indirect(reflect.ValueOf(v))
 	if s.Kind() != reflect.Struct {
 		return nil, ErrNotAStruct
 	}
+
+	fmt.Printf("get field: %s value: %+v\n", field, s)
 
 	f := s.FieldByName(field)
 	if !f.IsValid() {
@@ -43,11 +23,7 @@ func FieldValue(v interface{}, field string) (interface{}, error) {
 }
 
 func FieldTagValue(v interface{}, field string, tag string) (interface{}, error) {
-	s, err := resolvePtr(reflect.ValueOf(v))
-	if err != nil {
-		return nil, err
-	}
-
+	s := reflect.Indirect(reflect.ValueOf(v))
 	if s.Kind() != reflect.Struct {
 		return nil, ErrNotAStruct
 	}

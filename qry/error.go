@@ -1,4 +1,4 @@
-package query
+package qry
 
 import (
 	"errors"
@@ -10,4 +10,5 @@ var (
 	ErrUnknownField     = errors.New("unknown field")
 	ErrNotSameKind      = errors.New("not same kind")
 	ErrKindNotSupported = errors.New("kind not supported")
+	ErrUnknownOperator  = errors.New("unknown operator")
 )
