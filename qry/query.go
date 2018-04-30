@@ -9,7 +9,10 @@ import (
 type Operator int
 
 const (
-	EQ Operator = iota
+	AND Operator = iota
+	OR
+	NOT
+	EQ
 	NEQ
 	LT
 	LTE
@@ -27,15 +30,40 @@ type Query struct {
 
 type Match struct {
 	Operator Operator
+	Query    *Query
 	Field    string
 	Value    interface{}
-	Matches  Matches
 }
 
 type Matches []*Match
 
 func NewQuery() *Query {
 	return &Query{}
+}
+
+/*
+func (q *Query) WithTag(tag string) *Query {
+	q.tag = tag
+	return q
+}
+
+func (q *Query) WithOrderBy(orderBy string) *Query {
+	q.orderBy = orderBy
+	return q
+}
+
+func (q *Query) WithLimit(limit int) *Query {
+	q.limit = limit
+	return q
+}
+*/
+
+func (q *Query) AddMatchSubQuery(operator Operator, query *Query) *Query {
+	q.Matches = append(q.Matches, &Match{
+		Operator: operator,
+		Query:    query,
+	})
+	return q
 }
 
 func (q *Query) AddMatch(operator Operator, field string, value interface{}) *Query {
@@ -45,6 +73,18 @@ func (q *Query) AddMatch(operator Operator, field string, value interface{}) *Qu
 		Value:    value,
 	})
 	return q
+}
+
+func And(query *Query) *Query {
+	return NewQuery().AddMatchSubQuery(AND, query)
+}
+
+func Or(query *Query) *Query {
+	return NewQuery().AddMatchSubQuery(OR, query)
+}
+
+func Not(query *Query) *Query {
+	return NewQuery().AddMatchSubQuery(NOT, query)
 }
 
 func Eq(field string, value interface{}) *Query {
@@ -71,6 +111,22 @@ func Gte(field string, value interface{}) *Query {
 	return NewQuery().AddMatch(GTE, field, value)
 }
 
+func Re(field string, value string) *Query {
+	return NewQuery().AddMatch(RE, field, value)
+}
+
+func (q *Query) And(query *Query) *Query {
+	return q.AddMatchSubQuery(AND, query)
+}
+
+func (q *Query) Or(query *Query) *Query {
+	return q.AddMatchSubQuery(OR, query)
+}
+
+func (q *Query) Not(query *Query) *Query {
+	return q.AddMatchSubQuery(NOT, query)
+}
+
 func (q *Query) Eq(field string, value interface{}) *Query {
 	return q.AddMatch(EQ, field, value)
 }
@@ -92,6 +148,10 @@ func (q *Query) Gt(field string, value interface{}) *Query {
 }
 
 func (q *Query) Gte(field string, value interface{}) *Query {
+	return q.AddMatch(GTE, field, value)
+}
+
+func (q *Query) Re(field string, value string) *Query {
 	return q.AddMatch(GTE, field, value)
 }
 
@@ -142,6 +202,8 @@ func (m *Match) Match(a interface{}) ([]interface{}, error) {
 			matched, err = cmp.Gt(fv, m.Value)
 		case GTE:
 			matched, err = cmp.Gte(fv, m.Value)
+		case RE:
+			matched, err = cmp.Re(m.Value.(string), fv)
 		}
 
 		if err != nil {
