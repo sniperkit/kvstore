@@ -177,5 +177,35 @@ func CmpRe(expr string, a interface{}) (bool, error) {
 }
 
 func CmpIn(a, b interface{}) (bool, error) {
+	va, err := resolvePtr(reflect.ValueOf(a))
+	if err != nil {
+		return false, err
+	}
+
+	vb, err := resolvePtr(reflect.ValueOf(b))
+	if err != nil {
+		return false, err
+	}
+
+	if va.Kind() != reflect.Array || va.Kind() != reflect.Slice {
+		return false, ErrKindNotSupported
+	}
+
+	va0 := reflect.ValueOf(a.([]interface{})[0])
+	if va0.Kind() != vb.Kind() {
+		return false, ErrNotSameKind
+	}
+
+	for _, i := range a.([]interface{}) {
+		m, err := CmpEq(i, b)
+		if err != nil {
+			return false, err
+		}
+
+		if m {
+			return true, nil
+		}
+	}
+
 	return false, nil
 }
