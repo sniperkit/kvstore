@@ -6,125 +6,152 @@ import (
 	"github.com/mickep76/kvstore/cmp"
 )
 
-type Operator string
+type Operator int
 
 const (
-	EQ  Operator = "EQ"
-	NEQ Operator = "NEQ"
-	LT  Operator = "LT"
-	LTE Operator = "LTE"
-	GT  Operator = "GT"
-	GTE Operator = "GTE"
-	RE  Operator = "RE"
+	EQ Operator = iota
+	NEQ
+	LT
+	LTE
+	GT
+	GTE
+	RE
 )
 
 type Query struct {
+	Tag     string
+	OrderBy string
+	Limit   int
+	Matches Matches
+}
+
+type Match struct {
 	Operator Operator
 	Field    string
 	Value    interface{}
-	Queries  Queries
+	Matches  Matches
 }
 
-type Queries []*Query
+type Matches []*Match
 
-func NewQuery(operator Operator, field string, value interface{}) *Query {
-	return &Query{
+func NewQuery() *Query {
+	return &Query{}
+}
+
+func (q *Query) AddMatch(operator Operator, field string, value interface{}) *Query {
+	q.Matches = append(q.Matches, &Match{
 		Operator: operator,
 		Field:    field,
 		Value:    value,
-	}
+	})
+	return q
 }
 
 func Eq(field string, value interface{}) *Query {
-	return &Query{
-		Operator: EQ,
-		Field:    field,
-		Value:    value,
-	}
+	return NewQuery().AddMatch(EQ, field, value)
 }
 
 func Neq(field string, value interface{}) *Query {
-	return &Query{
-		Operator: NEQ,
-		Field:    field,
-		Value:    value,
-	}
+	return NewQuery().AddMatch(NEQ, field, value)
 }
 
 func Lt(field string, value interface{}) *Query {
-	return &Query{
-		Operator: LT,
-		Field:    field,
-		Value:    value,
-	}
+	return NewQuery().AddMatch(LT, field, value)
 }
 
 func Lte(field string, value interface{}) *Query {
-	return &Query{
-		Operator: LTE,
-		Field:    field,
-		Value:    value,
-	}
+	return NewQuery().AddMatch(LTE, field, value)
 }
 
 func Gt(field string, value interface{}) *Query {
-	return &Query{
-		Operator: GT,
-		Field:    field,
-		Value:    value,
-	}
+	return NewQuery().AddMatch(GT, field, value)
 }
 
 func Gte(field string, value interface{}) *Query {
-	return &Query{
-		Operator: GTE,
-		Field:    field,
-		Value:    value,
-	}
+	return NewQuery().AddMatch(GTE, field, value)
+}
+
+func (q *Query) Eq(field string, value interface{}) *Query {
+	return q.AddMatch(EQ, field, value)
+}
+
+func (q *Query) Neq(field string, value interface{}) *Query {
+	return q.AddMatch(NEQ, field, value)
+}
+
+func (q *Query) Lt(field string, value interface{}) *Query {
+	return q.AddMatch(LT, field, value)
+}
+
+func (q *Query) Lte(field string, value interface{}) *Query {
+	return q.AddMatch(LTE, field, value)
+}
+
+func (q *Query) Gt(field string, value interface{}) *Query {
+	return q.AddMatch(GT, field, value)
+}
+
+func (q *Query) Gte(field string, value interface{}) *Query {
+	return q.AddMatch(GTE, field, value)
 }
 
 func (q *Query) Match(a interface{}) ([]interface{}, error) {
+	first := true
+	var r []interface{}
+	for _, m := range q.Matches {
+		var err error
+		if first {
+			r, err = m.Match(a)
+			first = false
+		} else {
+			r, err = m.Match(r)
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return r, nil
+}
+
+func (m *Match) Match(a interface{}) ([]interface{}, error) {
 	v := reflect.Indirect(reflect.ValueOf(a))
 	if v.Kind() != reflect.Array && v.Kind() != reflect.Slice {
 		return nil, ErrKindNotSupported
 	}
 
-	if v.Len() == 0 {
-		return nil, nil
-	}
-
-	var results []interface{}
+	var r []interface{}
 	for i := 0; i < v.Len(); i++ {
-		fv, err := FieldValue(v.Index(i).Interface(), q.Field)
+		fv, err := FieldValue(v.Index(i).Interface(), m.Field)
 		if err != nil {
 			return nil, err
 		}
 
-		var match bool
-		switch q.Operator {
+		var matched bool
+		switch m.Operator {
 		case EQ:
-			match, err = cmp.Eq(fv, q.Value)
+			matched, err = cmp.Eq(fv, m.Value)
 		case NEQ:
-			match, err = cmp.Neq(fv, q.Value)
+			matched, err = cmp.Neq(fv, m.Value)
 		case LT:
-			match, err = cmp.Lt(fv, q.Value)
+			matched, err = cmp.Lt(fv, m.Value)
 		case LTE:
-			match, err = cmp.Lte(fv, q.Value)
+			matched, err = cmp.Lte(fv, m.Value)
 		case GT:
-			match, err = cmp.Gt(fv, q.Value)
+			matched, err = cmp.Gt(fv, m.Value)
 		case GTE:
-			match, err = cmp.Gte(fv, q.Value)
-		default:
-			return nil, ErrUnknownOperator
+			matched, err = cmp.Gte(fv, m.Value)
 		}
 
 		if err != nil {
 			return nil, err
 		}
-		if match {
-			results = append(results, v.Index(i).Interface())
+
+		if matched {
+			r = append(r, v.Index(i).Interface())
 		}
 	}
 
-	return results, nil
+	return r, nil
 }
