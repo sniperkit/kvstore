@@ -51,7 +51,7 @@ func (ds *datastore) FindClient(field string, value interface{}) (*Client, error
 		return nil, err
 	}
 
-	r, err := qry.NewQuery(qry.EQ, field, value).Match(all)
+	r, err := qry.Eq(field, value).Match(all)
 	if err != nil {
 		return nil, err
 	}

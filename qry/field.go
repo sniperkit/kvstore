@@ -1,7 +1,6 @@
 package qry
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 )
@@ -11,8 +10,6 @@ func FieldValue(v interface{}, field string) (interface{}, error) {
 	if s.Kind() != reflect.Struct {
 		return nil, ErrNotAStruct
 	}
-
-	fmt.Printf("get field: %s value: %+v\n", field, s)
 
 	f := s.FieldByName(field)
 	if !f.IsValid() {

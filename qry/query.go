@@ -9,18 +9,13 @@ import (
 type Operator string
 
 const (
-	GROUP Operator = "GROUP"
-	AND   Operator = "AND"
-	OR    Operator = "OR"
-	NOT   Operator = "NOT"
-	EQ    Operator = "EQ"
-	NEQ   Operator = "NEQ"
-	LT    Operator = "LT"
-	LTE   Operator = "LTE"
-	GT    Operator = "GT"
-	GTE   Operator = "GTE"
-	IN    Operator = "IN"
-	RE    Operator = "RE"
+	EQ  Operator = "EQ"
+	NEQ Operator = "NEQ"
+	LT  Operator = "LT"
+	LTE Operator = "LTE"
+	GT  Operator = "GT"
+	GTE Operator = "GTE"
+	RE  Operator = "RE"
 )
 
 type Query struct {
@@ -35,6 +30,54 @@ type Queries []*Query
 func NewQuery(operator Operator, field string, value interface{}) *Query {
 	return &Query{
 		Operator: operator,
+		Field:    field,
+		Value:    value,
+	}
+}
+
+func Eq(field string, value interface{}) *Query {
+	return &Query{
+		Operator: EQ,
+		Field:    field,
+		Value:    value,
+	}
+}
+
+func Neq(field string, value interface{}) *Query {
+	return &Query{
+		Operator: NEQ,
+		Field:    field,
+		Value:    value,
+	}
+}
+
+func Lt(field string, value interface{}) *Query {
+	return &Query{
+		Operator: LT,
+		Field:    field,
+		Value:    value,
+	}
+}
+
+func Lte(field string, value interface{}) *Query {
+	return &Query{
+		Operator: LTE,
+		Field:    field,
+		Value:    value,
+	}
+}
+
+func Gt(field string, value interface{}) *Query {
+	return &Query{
+		Operator: GT,
+		Field:    field,
+		Value:    value,
+	}
+}
+
+func Gte(field string, value interface{}) *Query {
+	return &Query{
+		Operator: GTE,
 		Field:    field,
 		Value:    value,
 	}
