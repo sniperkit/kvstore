@@ -3,7 +3,10 @@ package cmp
 import (
 	"reflect"
 	"regexp"
+	"time"
 )
+
+// Support custom functions for compare of types
 
 func Eq(a, b interface{}) (bool, error) {
 	va := reflect.Indirect(reflect.ValueOf(a))
@@ -41,6 +44,12 @@ func Eq(a, b interface{}) (bool, error) {
 
 	case reflect.String:
 		return a.(string) == b.(string), nil
+
+	case reflect.Struct:
+		if va.Type().String() == "time.Time" && vb.Type().String() == "time.Time" {
+			return va.Interface().(time.Time).Equal(vb.Interface().(time.Time)), nil
+		}
+		return false, ErrKindNotSupported
 	}
 
 	return false, ErrKindNotSupported
@@ -85,6 +94,12 @@ func Lt(a, b interface{}) (bool, error) {
 
 	case reflect.String:
 		return a.(string) < b.(string), nil
+
+	case reflect.Struct:
+		if va.Type().String() == "time.Time" && vb.Type().String() == "time.Time" {
+			return va.Interface().(time.Time).Before(vb.Interface().(time.Time)), nil
+		}
+		return false, ErrKindNotSupported
 	}
 
 	return false, ErrKindNotSupported
@@ -127,6 +142,15 @@ func Lte(a, b interface{}) (bool, error) {
 
 	case reflect.String:
 		return a.(string) <= b.(string), nil
+
+	case reflect.Struct:
+		if va.Type().String() == "time.Time" && vb.Type().String() == "time.Time" {
+			if va.Interface().(time.Time).Before(vb.Interface().(time.Time)) && va.Interface().(time.Time).Equal(vb.Interface().(time.Time)) {
+				return true, nil
+			}
+			return false, nil
+		}
+		return false, ErrKindNotSupported
 	}
 
 	return false, ErrKindNotSupported

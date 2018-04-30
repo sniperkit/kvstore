@@ -6,6 +6,9 @@ import (
 	"github.com/mickep76/kvstore/cmp"
 )
 
+// Support and, not, or
+// Suppoty tag, orderBy, limit
+
 type Operator int
 
 const (

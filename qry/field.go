@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+// Support dot notation field.sub-field
+
 func FieldValue(v interface{}, field string) (interface{}, error) {
 	s := reflect.Indirect(reflect.ValueOf(v))
 	if s.Kind() != reflect.Struct {
