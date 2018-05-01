@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Support custom functions for compare of types
+// Support custom functions for compare of types, either like JSONMarshal or CmpFunc(type string, func)
 
 func Eq(a, b interface{}) (bool, error) {
 	va := reflect.Indirect(reflect.ValueOf(a))
@@ -110,50 +110,21 @@ func Gt(a, b interface{}) (bool, error) {
 }
 
 func Lte(a, b interface{}) (bool, error) {
-	va := reflect.Indirect(reflect.ValueOf(a))
-	vb := reflect.Indirect(reflect.ValueOf(b))
-
-	if va.Kind() != vb.Kind() {
-		return false, ErrNotSameKind
+	m1, err := Lt(a, b)
+	if err != nil {
+		return false, err
 	}
 
-	switch va.Kind() {
-	case reflect.Int:
-		return a.(int) <= b.(int), nil
-	case reflect.Int8:
-		return a.(int8) <= b.(int8), nil
-	case reflect.Int16:
-		return a.(int16) <= b.(int16), nil
-	case reflect.Int32:
-		return a.(int32) <= b.(int32), nil
-	case reflect.Int64:
-		return a.(int64) <= b.(int64), nil
-
-	case reflect.Uint:
-		return a.(uint) <= b.(uint), nil
-	case reflect.Uint8:
-		return a.(uint8) <= b.(uint8), nil
-	case reflect.Uint16:
-		return a.(uint16) <= b.(uint16), nil
-	case reflect.Uint32:
-		return a.(uint32) <= b.(uint32), nil
-	case reflect.Uint64:
-		return a.(uint64) <= b.(uint64), nil
-
-	case reflect.String:
-		return a.(string) <= b.(string), nil
-
-	case reflect.Struct:
-		if va.Type().String() == "time.Time" && vb.Type().String() == "time.Time" {
-			if va.Interface().(time.Time).Before(vb.Interface().(time.Time)) && va.Interface().(time.Time).Equal(vb.Interface().(time.Time)) {
-				return true, nil
-			}
-			return false, nil
-		}
-		return false, ErrKindNotSupported
+	m2, err := Eq(a, b)
+	if err != nil {
+		return false, err
 	}
 
-	return false, ErrKindNotSupported
+	if m1 || m2 {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func Gte(a, b interface{}) (bool, error) {

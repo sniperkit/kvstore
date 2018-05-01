@@ -7,7 +7,7 @@ import (
 )
 
 // Support and, not, or
-// Suppoty tag, orderBy, limit
+// Support tag, orderBy, limit
 
 type Operator int
 
