@@ -3,11 +3,8 @@ package qry
 import (
 	"reflect"
 
-	"github.com/mickep76/kvstore/cmp"
+	"github.com/mickep76/cmp"
 )
-
-// Support and, not, or
-// Support tag, orderBy, limit
 
 type Operator int
 
@@ -21,7 +18,6 @@ const (
 	LTE
 	GT
 	GTE
-	RE
 )
 
 type Query struct {
@@ -114,10 +110,6 @@ func Gte(field string, value interface{}) *Query {
 	return NewQuery().AddMatch(GTE, field, value)
 }
 
-func Re(field string, value string) *Query {
-	return NewQuery().AddMatch(RE, field, value)
-}
-
 func (q *Query) And(query *Query) *Query {
 	return q.AddMatchSubQuery(AND, query)
 }
@@ -205,8 +197,6 @@ func (m *Match) Match(a interface{}) ([]interface{}, error) {
 			matched, err = cmp.Gt(fv, m.Value)
 		case GTE:
 			matched, err = cmp.Gte(fv, m.Value)
-		case RE:
-			matched, err = cmp.Re(m.Value.(string), fv)
 		}
 
 		if err != nil {
