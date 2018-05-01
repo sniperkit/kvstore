@@ -105,7 +105,6 @@ func Lt(a, b interface{}) (bool, error) {
 		if va.Type().String() == "time.Time" && vb.Type().String() == "time.Time" {
 			return va.Interface().(time.Time).Before(vb.Interface().(time.Time)), nil
 		}
-		return false, ErrKindNotSupported
 
 		if ca, ok := va.Interface().(Comparer); ok {
 			return ca.Lt(vb.Interface())
