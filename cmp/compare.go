@@ -6,7 +6,10 @@ import (
 	"time"
 )
 
-// Support custom functions for compare of types, either like JSONMarshal or CmpFunc(type string, func)
+type Comparer interface {
+	Eq(b interface{}) (bool, error)
+	Lt(b interface{}) (bool, error)
+}
 
 func Eq(a, b interface{}) (bool, error) {
 	va := reflect.Indirect(reflect.ValueOf(a))
@@ -49,7 +52,10 @@ func Eq(a, b interface{}) (bool, error) {
 		if va.Type().String() == "time.Time" && vb.Type().String() == "time.Time" {
 			return va.Interface().(time.Time).Equal(vb.Interface().(time.Time)), nil
 		}
-		return false, ErrKindNotSupported
+
+		if ca, ok := va.Interface().(Comparer); ok {
+			return ca.Eq(vb.Interface())
+		}
 	}
 
 	return false, ErrKindNotSupported
@@ -100,6 +106,10 @@ func Lt(a, b interface{}) (bool, error) {
 			return va.Interface().(time.Time).Before(vb.Interface().(time.Time)), nil
 		}
 		return false, ErrKindNotSupported
+
+		if ca, ok := va.Interface().(Comparer); ok {
+			return ca.Lt(vb.Interface())
+		}
 	}
 
 	return false, ErrKindNotSupported
