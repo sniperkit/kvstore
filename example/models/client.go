@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/mickep76/kvstore"
-	"github.com/mickep76/kvstore/qry"
+	"github.com/mickep76/qry"
 	"github.com/pborman/uuid"
 )
 
@@ -51,7 +51,7 @@ func (ds *datastore) FindClient(field string, value interface{}) (*Client, error
 		return nil, err
 	}
 
-	r, err := qry.Eq(field, value).Match(all)
+	r, err := qry.Eq(field, value).Eval(all)
 	if err != nil {
 		return nil, err
 	}
