@@ -27,9 +27,14 @@ type KeyValues []KeyValue
 
 // Decode multiple values.
 func (kvs KeyValues) Decode(value interface{}) error {
-	v := reflect.Indirect(reflect.ValueOf(value))
+	p := reflect.ValueOf(value)
+	if p.Kind() != reflect.Ptr {
+		return ErrNotPtrListStruct
+	}
+
+	v := reflect.Indirect(p)
 	if v.Kind() != reflect.Slice {
-		return ErrNotSlice
+		return ErrNotPtrListStruct
 	}
 
 	for _, kv := range kvs {
@@ -39,7 +44,7 @@ func (kvs KeyValues) Decode(value interface{}) error {
 		}
 
 		if t.Kind() != reflect.Struct {
-			return ErrNotStruct
+			return ErrNotPtrListStruct
 		}
 
 		nv := reflect.New(t)
