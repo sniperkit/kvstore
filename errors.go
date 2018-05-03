@@ -7,4 +7,5 @@ var (
 	ErrEmptyValue   = errors.New("empty value")
 	ErrNotSlice     = errors.New("not a slice")
 	ErrNotStruct    = errors.New("not a struct")
+	ErrNotPtr       = errors.New("not a ptr")
 )

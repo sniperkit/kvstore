@@ -37,9 +37,11 @@ func (kvs KeyValues) Decode(value interface{}) error {
 		if t.Kind() == reflect.Ptr {
 			t = t.Elem()
 		}
-		//		if v.Kind() != reflect.Struct {
-		//			return ErrNotStruct
-		//		}
+
+		if t.Kind() != reflect.Struct {
+			return ErrNotStruct
+		}
+
 		nv := reflect.New(t)
 
 		if err := kv.Decode(nv.Interface()); err != nil {
