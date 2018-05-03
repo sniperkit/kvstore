@@ -35,16 +35,7 @@ func (ds *datastore) AllServers() (Servers, error) {
 	}
 
 	servers := Servers{}
-	for _, kv := range kvs {
-		s := &Server{}
-		if err := kv.Decode(s); err != nil {
-			return nil, err
-		}
-
-		servers = append(servers, s)
-	}
-
-	return servers, nil
+	return servers, kvs.Decode(&servers)
 }
 
 func (ds *datastore) FindServer(field string, value interface{}) (*Server, error) {

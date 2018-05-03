@@ -33,16 +33,7 @@ func (ds *datastore) AllClients() (Clients, error) {
 	}
 
 	clients := Clients{}
-	for _, kv := range kvs {
-		c := &Client{}
-		if err := kv.Decode(c); err != nil {
-			return nil, err
-		}
-
-		clients = append(clients, c)
-	}
-
-	return clients, nil
+	return clients, kvs.Decode(&clients)
 }
 
 func (ds *datastore) FindClient(field string, value interface{}) (*Client, error) {

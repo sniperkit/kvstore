@@ -1,5 +1,9 @@
 package kvstore
 
+import (
+	"reflect"
+)
+
 // Value of key.
 type Value []byte
 
@@ -20,3 +24,28 @@ type KeyValue interface {
 
 // KeyValues multiple key/values.
 type KeyValues []KeyValue
+
+// Decode multiple values.
+func (kvs KeyValues) Decode(value interface{}) error {
+	pv := reflect.ValueOf(value)
+	v := reflect.Indirect(pv)
+	if v.Kind() != reflect.Slice {
+		return ErrNotSlice
+	}
+
+	for _, kv := range kvs {
+		t := v.Type().Elem()
+		if t.Kind() == reflect.Ptr {
+			t = t.Elem()
+		}
+		nv := reflect.New(t)
+
+		if err := kv.Decode(nv.Interface()); err != nil {
+			return err
+		}
+
+		v.Set(reflect.Append(v, nv))
+	}
+
+	return nil
+}
