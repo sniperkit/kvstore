@@ -10,10 +10,10 @@ import (
 )
 
 type Client struct {
-	UUID     string     `json:"uuid"`
+	UUID     string     `json:"uuid" kvstore:"unique"`
 	Created  time.Time  `json:"created"`
 	Updated  *time.Time `json:"updated,omitempty"`
-	Hostname string     `json:"hostname"`
+	Hostname string     `json:"hostname" kvstore:"unique"`
 }
 
 type Clients []*Client
@@ -56,8 +56,8 @@ func (ds *datastore) FindClient(field string, value interface{}) (*Client, error
 		return nil, err
 	}
 
-	if len(r) > 0 {
-		return r[0].(*Client), nil
+	if len(r.(Clients)) > 0 {
+		return r.(Clients)[0], nil
 	}
 
 	return nil, nil

@@ -10,10 +10,10 @@ import (
 )
 
 type Server struct {
-	UUID     string     `json:"uuid"`
+	UUID     string     `json:"uuid" kvstore:"unique"`
 	Created  time.Time  `json:"created"`
 	Updated  *time.Time `json:"updated,omitempty"`
-	Hostname string     `json:"hostname"`
+	Hostname string     `json:"hostname" kvstore:"unique"`
 	Bind     string     `json:"bind"`
 }
 
@@ -58,8 +58,8 @@ func (ds *datastore) FindServer(field string, value interface{}) (*Server, error
 		return nil, err
 	}
 
-	if len(r) > 0 {
-		return r[0].(*Server), nil
+	if len(r.(Servers)) > 0 {
+		return r.(Servers)[0], nil
 	}
 
 	return nil, nil
