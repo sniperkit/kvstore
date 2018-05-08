@@ -2,8 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 
@@ -13,6 +15,7 @@ import (
 	_ "github.com/mickep76/encdec/json"
 	"github.com/mickep76/kvstore"
 	_ "github.com/mickep76/kvstore/etcdv3"
+	"github.com/mickep76/qry"
 
 	"github.com/mickep76/kvstore/example/models"
 )
@@ -43,12 +46,62 @@ var clientHandler = kvstore.WatchHandler(func(kv kvstore.KeyValue) {
 	}
 })
 
+func encodeQuery(vals url.Values) (qry.Query, error) {
+	q := qry.NewQuery()
+	for k, v := range vals {
+		if strings.HasPrefix(k, "!") {
+			q.Not()
+			k = strings.TrimPrefix(k, "!")
+		}
+
+		if strings.HasSuffix(k, "!") {
+			q.Neq(strings.TrimSuffix(k, "!"), v[0])
+			continue
+		}
+
+		a := strings.SplitN(k, "__", 2)
+		field := a[0]
+
+		if len(a) == 1 {
+			q.Eq(field, v[0])
+			continue
+		}
+
+		switch a[1] {
+		case "lt":
+			q.Lt(a[0], v[0])
+		case "gt":
+			q.Gt(a[0], v[0])
+		case "lte":
+			q.Lte(a[0], v[0])
+		case "gte":
+			q.Gte(a[0], v[0])
+		case "in":
+			q.In(a[0], v[0])
+		case "re":
+			q.Re(a[0], v[0])
+		default:
+			return nil, fmt.Errorf("unknown operator in url: %s", a[1])
+		}
+	}
+	return q, nil
+}
+
 func (h *Handler) allClients(w http.ResponseWriter, r *http.Request) {
-	v, err := h.ds.AllClients()
+	q, err := encodeQuery(r.URL.Query())
 	if err != nil {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
+		return
+	}
+
+	v, err := h.ds.QueryClients(q)
+	if err != nil {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -59,11 +112,20 @@ func (h *Handler) allClients(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) allServers(w http.ResponseWriter, r *http.Request) {
-	v, err := h.ds.AllServers()
+	q, err := encodeQuery(r.URL.Query())
+	if err != nil {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	v, err := h.ds.QueryServers(q)
 	if err != nil {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(err.Error()))
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")

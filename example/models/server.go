@@ -38,6 +38,25 @@ func (ds *datastore) AllServers() (Servers, error) {
 	return servers, kvs.Decode(&servers)
 }
 
+func (ds *datastore) QueryServers(q qry.Query) (Servers, error) {
+	kvs, err := ds.Values("servers")
+	if err != nil {
+		return nil, err
+	}
+
+	servers := Servers{}
+	if err := kvs.Decode(&servers); err != nil {
+		return nil, err
+	}
+
+	r, err := q.Tag("json").Eval(servers)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.(Servers), nil
+}
+
 func (ds *datastore) FindServer(field string, value interface{}) (*Server, error) {
 	all, err := ds.AllServers()
 	if err != nil {

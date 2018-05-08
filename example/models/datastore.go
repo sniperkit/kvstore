@@ -3,12 +3,15 @@ package models
 import (
 	"github.com/mickep76/kvstore"
 	_ "github.com/mickep76/kvstore/etcdv3"
+	"github.com/mickep76/qry"
 )
 
 type Datastore interface {
 	AllClients() (Clients, error)
+	QueryClients(qry.Query) (Clients, error)
 	CreateClient(client *Client) error
 	AllServers() (Servers, error)
+	QueryServers(qry.Query) (Servers, error)
 	CreateServer(server *Server) error
 }
 

@@ -36,6 +36,25 @@ func (ds *datastore) AllClients() (Clients, error) {
 	return clients, kvs.Decode(&clients)
 }
 
+func (ds *datastore) QueryClients(q qry.Query) (Clients, error) {
+	kvs, err := ds.Values("clients")
+	if err != nil {
+		return nil, err
+	}
+
+	clients := Clients{}
+	if err := kvs.Decode(&clients); err != nil {
+		return nil, err
+	}
+
+	r, err := q.Tag("json").Eval(clients)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.(Clients), nil
+}
+
 func (ds *datastore) FindClient(field string, value interface{}) (*Client, error) {
 	all, err := ds.AllClients()
 	if err != nil {
