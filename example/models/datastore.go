@@ -8,10 +8,10 @@ import (
 
 type Datastore interface {
 	AllClients() (Clients, error)
-	QueryClients(qry.Query) (Clients, error)
+	QueryClients(*qry.Query) (Clients, error)
 	CreateClient(client *Client) error
 	AllServers() (Servers, error)
-	QueryServers(qry.Query) (Servers, error)
+	QueryServers(*qry.Query) (Servers, error)
 	CreateServer(server *Server) error
 }
 
