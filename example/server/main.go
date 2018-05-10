@@ -9,23 +9,18 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/mickep76/encdec"
-	_ "github.com/mickep76/encdec/json"
 	"github.com/mickep76/kvstore"
 	_ "github.com/mickep76/kvstore/etcdv3"
 	"github.com/mickep76/qry"
 
-	"github.com/mickep76/kvstore/example/models"
+	"github.com/mickep76/kvstore/example/handler"
+	"github.com/mickep76/kvstore/example/model"
 )
-
-type Handler struct {
-	ds models.Datastore
-}
 
 var clientHandler = kvstore.WatchHandler(func(kv kvstore.KeyValue) {
 	log.Printf("client event: %s key: %s", kv.Event().Type, kv.Key())
 
-	c := &models.Client{}
+	c := &model.Client{}
 	if err := kv.Decode(c); err != nil {
 		log.Print(err)
 		return
@@ -34,7 +29,7 @@ var clientHandler = kvstore.WatchHandler(func(kv kvstore.KeyValue) {
 	log.Printf("client value: created: %s updated: %s uuid: %s hostname: %s", c.Created, c.Updated, c.UUID, c.Hostname)
 
 	if kv.PrevValue() != nil {
-		c := &models.Client{}
+		c := &model.Client{}
 		if err := kv.PrevDecode(c); err != nil {
 			log.Print(err)
 			return
@@ -43,54 +38,6 @@ var clientHandler = kvstore.WatchHandler(func(kv kvstore.KeyValue) {
 		log.Printf("client prev. value: created: %s updated: %s uuid: %s hostname: %s", c.Created, c.Updated, c.UUID, c.Hostname)
 	}
 })
-
-func (h *Handler) allClients(w http.ResponseWriter, r *http.Request) {
-	q, err := qry.FromURL(r.URL.Query())
-	if err != nil {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	v, err := h.ds.QueryClients(q)
-	if err != nil {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-
-	b, _ := encdec.ToBytes("json", v, encdec.WithIndent("  "))
-	w.Write(b)
-}
-
-func (h *Handler) allServers(w http.ResponseWriter, r *http.Request) {
-	q, err := qry.FromURL(r.URL.Query())
-	if err != nil {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	v, err := h.ds.QueryServers(q)
-	if err != nil {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-
-	b, _ := encdec.ToBytes("json", v, encdec.WithIndent("  "))
-	w.Write(b)
-}
 
 func main() {
 	// Parse arguments.
@@ -104,7 +51,7 @@ func main() {
 
 	// Connect to etcd.
 	log.Printf("connect to etcd")
-	ds, err := models.NewDatastore(*backend, strings.Split(*endpoints, ","), *keepalive, kvstore.WithTimeout(*timeout), kvstore.WithEncoding("json"), kvstore.WithPrefix(*prefix))
+	ds, err := model.NewDatastore(*backend, strings.Split(*endpoints, ","), *keepalive, kvstore.WithTimeout(*timeout), kvstore.WithEncoding("json"), kvstore.WithPrefix(*prefix))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -117,7 +64,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var s *models.Server
+	var s *model.Server
 	if len(servers) > 0 {
 		// Update server in datastore.
 		log.Printf("update server in datastore")
@@ -127,7 +74,7 @@ func main() {
 		}
 	} else {
 		log.Printf("create new server")
-		s = models.NewServer(hostname, *bind)
+		s = model.NewServer(hostname, *bind)
 
 		// Create server in datastore.
 		log.Printf("create server in datastore")
@@ -164,15 +111,15 @@ func main() {
 	// Create new router.
 	log.Printf("create http router")
 	router := mux.NewRouter()
-	h := &Handler{ds: ds}
+	h := handler.NewHandler(ds)
 
 	// Client handlers.
 	log.Printf("add route /api/clients")
-	router.HandleFunc("/api/clients", h.allClients).Methods("GET")
+	router.HandleFunc("/api/clients", h.AllClients).Methods("GET")
 
 	// Server handlers.
 	log.Printf("add route /api/servers")
-	router.HandleFunc("/api/servers", h.allServers).Methods("GET")
+	router.HandleFunc("/api/servers", h.AllServers).Methods("GET")
 
 	// Start https listener.
 	log.Printf("start http listener")

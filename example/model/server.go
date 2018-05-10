@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"fmt"
@@ -28,7 +28,7 @@ func NewServer(hostname string, bind string) *Server {
 	}
 }
 
-func (ds *datastore) QueryServers(q *qry.Query) (Servers, error) {
+func (ds *Datastore) QueryServers(q *qry.Query) (Servers, error) {
 	kvs, err := ds.Values("servers")
 	if err != nil {
 		return nil, err
@@ -47,11 +47,11 @@ func (ds *datastore) QueryServers(q *qry.Query) (Servers, error) {
 	return r.(Servers), nil
 }
 
-func (ds *datastore) CreateServer(server *Server) error {
+func (ds *Datastore) CreateServer(server *Server) error {
 	return ds.Set(fmt.Sprintf("servers/%s", server.UUID), server, kvstore.WithLease(ds.lease))
 }
 
-func (ds *datastore) UpdateServer(server *Server) error {
+func (ds *Datastore) UpdateServer(server *Server) error {
 	now := time.Now()
 	server.Updated = &now
 	return ds.Set(fmt.Sprintf("servers/%s", server.UUID), server, kvstore.WithLease(ds.lease))

@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ func NewClient(hostname string) *Client {
 	}
 }
 
-func (ds *datastore) QueryClients(q *qry.Query) (Clients, error) {
+func (ds *Datastore) QueryClients(q *qry.Query) (Clients, error) {
 	kvs, err := ds.Values("clients")
 	if err != nil {
 		return nil, err
@@ -45,11 +45,11 @@ func (ds *datastore) QueryClients(q *qry.Query) (Clients, error) {
 	return r.(Clients), nil
 }
 
-func (ds *datastore) CreateClient(client *Client) error {
+func (ds *Datastore) CreateClient(client *Client) error {
 	return ds.Set(fmt.Sprintf("clients/%s", client.UUID), client, kvstore.WithLease(ds.lease))
 }
 
-func (ds *datastore) UpdateClient(client *Client) error {
+func (ds *Datastore) UpdateClient(client *Client) error {
 	now := time.Now()
 	client.Updated = &now
 	return ds.Set(fmt.Sprintf("clients/%s", client.UUID), client, kvstore.WithLease(ds.lease))

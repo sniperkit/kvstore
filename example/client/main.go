@@ -11,7 +11,7 @@ import (
 	_ "github.com/mickep76/kvstore/etcdv3"
 	"github.com/mickep76/qry"
 
-	"github.com/mickep76/kvstore/example/models"
+	"github.com/mickep76/kvstore/example/model"
 )
 
 func main() {
@@ -25,7 +25,7 @@ func main() {
 
 	// Connect to etcd.
 	log.Printf("connect to etcd")
-	ds, err := models.NewDatastore(*backend, strings.Split(*endpoints, ","), *keepalive, kvstore.WithTimeout(*timeout), kvstore.WithEncoding("json"), kvstore.WithPrefix(*prefix))
+	ds, err := model.NewDatastore(*backend, strings.Split(*endpoints, ","), *keepalive, kvstore.WithTimeout(*timeout), kvstore.WithEncoding("json"), kvstore.WithPrefix(*prefix))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,7 +38,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var c *models.Client
+	var c *model.Client
 	if len(clients) > 0 {
 		// Update client in datastore.
 		log.Printf("update client in datastore")
@@ -48,7 +48,7 @@ func main() {
 		}
 	} else {
 		log.Printf("create new client")
-		c = models.NewClient(hostname)
+		c = model.NewClient(hostname)
 
 		// Create client in datastore.
 		log.Printf("create client in datastore")
