@@ -28,16 +28,6 @@ func NewServer(hostname string, bind string) *Server {
 	}
 }
 
-func (ds *datastore) AllServers() (Servers, error) {
-	kvs, err := ds.Values("servers")
-	if err != nil {
-		return nil, err
-	}
-
-	servers := Servers{}
-	return servers, kvs.Decode(&servers)
-}
-
 func (ds *datastore) QueryServers(q *qry.Query) (Servers, error) {
 	kvs, err := ds.Values("servers")
 	if err != nil {
@@ -49,30 +39,12 @@ func (ds *datastore) QueryServers(q *qry.Query) (Servers, error) {
 		return nil, err
 	}
 
-	r, err := q.Tag("json").Eval(servers)
+	r, err := q.Eval(servers)
 	if err != nil {
 		return nil, err
 	}
 
 	return r.(Servers), nil
-}
-
-func (ds *datastore) FindServer(field string, value interface{}) (*Server, error) {
-	all, err := ds.AllServers()
-	if err != nil {
-		return nil, err
-	}
-
-	r, err := qry.Eq(field, value).Eval(all)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(r.(Servers)) > 0 {
-		return r.(Servers)[0], nil
-	}
-
-	return nil, nil
 }
 
 func (ds *datastore) CreateServer(server *Server) error {

@@ -112,14 +112,16 @@ func main() {
 	// Find existing server in datastore.
 	log.Printf("find existing server in datastore")
 	hostname, _ := os.Hostname()
-	s, err := ds.FindServer("Hostname", hostname)
+	servers, err := ds.QueryServers(qry.Eq("Hostname", hostname))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if s != nil {
+	var s *models.Server
+	if len(servers) > 0 {
 		// Update server in datastore.
 		log.Printf("update server in datastore")
+		s = servers[0]
 		if err := ds.UpdateServer(s); err != nil {
 			log.Fatal(err)
 		}

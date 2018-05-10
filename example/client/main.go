@@ -9,6 +9,7 @@ import (
 
 	"github.com/mickep76/kvstore"
 	_ "github.com/mickep76/kvstore/etcdv3"
+	"github.com/mickep76/qry"
 
 	"github.com/mickep76/kvstore/example/models"
 )
@@ -32,14 +33,16 @@ func main() {
 	// Find existing client in datastore.
 	log.Printf("find existing client in datastore")
 	hostname, _ := os.Hostname()
-	c, err := ds.FindClient("Hostname", hostname)
+	clients, err := ds.QueryClients(qry.Eq("Hostname", hostname))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if c != nil {
+	var c *models.Client
+	if len(clients) > 0 {
 		// Update client in datastore.
 		log.Printf("update client in datastore")
+		c = clients[0]
 		if err := ds.UpdateClient(c); err != nil {
 			log.Fatal(err)
 		}
