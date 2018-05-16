@@ -59,7 +59,7 @@ func main() {
 	// Find existing server in datastore.
 	log.Printf("find existing server in datastore")
 	hostname, _ := os.Hostname()
-	servers, err := ds.QueryServers(qry.Eq("Hostname", hostname))
+	servers, err := ds.QueryServers(qry.New().Eq("Hostname", hostname))
 	if err != nil {
 		log.Fatal(err)
 	}

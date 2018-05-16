@@ -39,7 +39,7 @@ func (ds *Datastore) QueryServers(q *qry.Query) (Servers, error) {
 		return nil, err
 	}
 
-	r, err := q.Eval(servers)
+	r, err := q.Query(servers)
 	if err != nil {
 		return nil, err
 	}

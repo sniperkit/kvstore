@@ -33,7 +33,7 @@ func main() {
 	// Find existing client in datastore.
 	log.Printf("find existing client in datastore")
 	hostname, _ := os.Hostname()
-	clients, err := ds.QueryClients(qry.Eq("Hostname", hostname))
+	clients, err := ds.QueryClients(qry.New().Eq("Hostname", hostname))
 	if err != nil {
 		log.Fatal(err)
 	}
