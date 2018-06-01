@@ -26,7 +26,7 @@ func NewClient(hostname string) *Client {
 	}
 }
 
-func (ds *Datastore) QueryClients(q *qry.Query) (Clients, error) {
+func (ds *Datastore) AllClients() (Clients, error) {
 	kvs, err := ds.Values("clients")
 	if err != nil {
 		return nil, err
@@ -37,12 +37,39 @@ func (ds *Datastore) QueryClients(q *qry.Query) (Clients, error) {
 		return nil, err
 	}
 
-	r, err := q.Query(clients)
+	return clients, nil
+}
+
+func (ds *Datastore) QueryClients(q *qry.Query) (Clients, error) {
+	clients, err := ds.AllClients()
 	if err != nil {
 		return nil, err
 	}
 
-	return r.(Clients), nil
+	filtered, err := q.Query(clients)
+	if err != nil {
+		return nil, err
+	}
+
+	return filtered.(Clients), nil
+}
+
+func (ds *Datastore) OneClient(uuid string) (*Client, error) {
+	kvs, err := ds.Values(fmt.Sprintf("clients/%s", uuid))
+	if err != nil {
+		return nil, err
+	}
+
+	clients := Clients{}
+	if err := kvs.Decode(&clients); err != nil {
+		return nil, err
+	}
+
+	if len(clients) > 0 {
+		return clients[0], nil
+	}
+
+	return nil, nil
 }
 
 func (ds *Datastore) CreateClient(client *Client) error {

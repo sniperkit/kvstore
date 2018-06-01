@@ -28,7 +28,7 @@ func NewServer(hostname string, bind string) *Server {
 	}
 }
 
-func (ds *Datastore) QueryServers(q *qry.Query) (Servers, error) {
+func (ds *Datastore) AllServers() (Servers, error) {
 	kvs, err := ds.Values("servers")
 	if err != nil {
 		return nil, err
@@ -39,12 +39,39 @@ func (ds *Datastore) QueryServers(q *qry.Query) (Servers, error) {
 		return nil, err
 	}
 
-	r, err := q.Query(servers)
+	return servers, nil
+}
+
+func (ds *Datastore) QueryServers(q *qry.Query) (Servers, error) {
+	servers, err := ds.AllServers()
 	if err != nil {
 		return nil, err
 	}
 
-	return r.(Servers), nil
+	filtered, err := q.Query(servers)
+	if err != nil {
+		return nil, err
+	}
+
+	return filtered.(Servers), nil
+}
+
+func (ds *Datastore) OneServer(uuid string) (*Server, error) {
+	kvs, err := ds.Values(fmt.Sprintf("servers/%s", uuid))
+	if err != nil {
+		return nil, err
+	}
+
+	servers := Servers{}
+	if err := kvs.Decode(&servers); err != nil {
+		return nil, err
+	}
+
+	if len(servers) > 0 {
+		return servers[0], nil
+	}
+
+	return nil, nil
 }
 
 func (ds *Datastore) CreateServer(server *Server) error {

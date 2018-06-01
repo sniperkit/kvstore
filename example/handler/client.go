@@ -3,31 +3,34 @@ package handler
 import (
 	"net/http"
 
-	"github.com/mickep76/encdec"
-	_ "github.com/mickep76/encdec/json"
+	"github.com/gorilla/mux"
 	"github.com/mickep76/qry"
 )
 
 func (h *Handler) AllClients(w http.ResponseWriter, r *http.Request) {
 	q, err := qry.FromURL(r.URL.Query())
 	if err != nil {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		writeError(w, err)
 		return
 	}
 
-	v, err := h.ds.QueryClients(q)
+	clients, err := h.ds.QueryClients(q)
 	if err != nil {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		writeError(w, err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
+	write(w, clients)
+}
 
-	b, _ := encdec.ToBytes("json", v, encdec.WithIndent("  "))
-	w.Write(b)
+func (h *Handler) OneClient(w http.ResponseWriter, r *http.Request) {
+	uuid := mux.Vars(r)["uuid"]
+
+	client, err := h.ds.OneClient(uuid)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+
+	write(w, client)
 }
