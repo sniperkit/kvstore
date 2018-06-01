@@ -18,20 +18,19 @@ req:
 	cfssl gencert \
 	  -ca certs/ca.pem \
 	  -ca-key certs/ca.key \
-	  -config config/ca_cfg.json config/req_csr.json | cfssljson -bare certs/etcd1
-	mv certs/etcd1-key.pem certs/etcd1.key
-
-
-	cfssl gencert \
-	  -ca certs/ca.pem \
-	  -ca-key certs/ca.key \
-	  -config config/ca_cfg.json config/req_csr.json | cfssljson -bare certs/etcd2
-	mv certs/etcd2-key.pem certs/etcd2.key
+	  -config config/ca_cfg.json config/etcd_server.json | cfssljson -bare certs/etcd
+	mv certs/etcd-key.pem certs/etcd.key
 
 	cfssl gencert \
 	  -ca certs/ca.pem \
 	  -ca-key certs/ca.key \
-	  -config config/ca_cfg.json config/req_csr.json | cfssljson -bare certs/etcd3
-	mv certs/etcd3-key.pem certs/etcd3.key
+	  -config config/ca_cfg.json config/d2b_server.json | cfssljson -bare certs/d2b_server
+	mv certs/d2b_server-key.pem certs/d2b_server.key
+
+	cfssl gencert \
+	  -ca certs/ca.pem \
+	  -ca-key certs/ca.key \
+	  -config config/ca_cfg.json config/d2b_client.json | cfssljson -bare certs/d2b_client
+	mv certs/d2b_client-key.pem certs/d2b_client.key
 
 .PHONY: clean preq ca req

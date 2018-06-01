@@ -1,1 +1,1 @@
-etcd --name etcd1 --data-dir data --trusted-ca-file certs/ca.pem --cert-file certs/etcd1.pem --key-file=certs/etcd1.key --advertise-client-urls=https://127.0.0.1:2379 --listen-client-urls=https://127.0.0.1:2379 --client-cert-auth
+etcd --name etcd1 --data-dir data --trusted-ca-file certs/ca.pem --cert-file certs/etcd.pem --key-file=certs/etcd.key --advertise-client-urls=https://127.0.0.1:2379 --listen-client-urls=https://127.0.0.1:2379 --client-cert-auth

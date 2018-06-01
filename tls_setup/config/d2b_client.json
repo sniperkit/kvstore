@@ -1,9 +1,6 @@
 {
-  "CN": "etcd",
+  "CN": "d2b-client",
   "hosts": [
-    "etcd1",
-    "etcd2",
-    "etcd3",
     "localhost",
     "127.0.0.1"
   ],
@@ -14,8 +11,8 @@
   "names": [
     {
       "L": "US",
-      "O": "etcd",
-      "OU": "etcd cluster"
+      "O": "d2b",
+      "OU": "d2b client"
     }
   ]
 }
