@@ -4,6 +4,7 @@
 
 ```bash
 make clean
+make preq
 make
 ```
 
