@@ -4,7 +4,7 @@ ETCDCTL="etcdctl --cacert certs/ca.pem --cert certs/etcd.pem --key certs/etcd.ke
 
 export ETCDCTL_API=3
 
-# Create root user and enable authentication
+# Create root user
 ${ETCDCTL} user add root:abc123
 
 # Create roles
@@ -12,8 +12,8 @@ ${ETCDCTL} role add example-server-rw
 ${ETCDCTL} role add example-client-rw
 
 # Add permissions to roles
-${ETCDCTL} role grant-permission example-server-rw --prefix=true readwrite /dock2box
-${ETCDCTL} role grant-permission example-client-rw --prefix=true readwrite /dock2box/clients
+${ETCDCTL} role grant-permission example-server-rw --prefix=true readwrite /example
+${ETCDCTL} role grant-permission example-client-rw --prefix=true readwrite /example/clients
 
 # Create users
 ${ETCDCTL} user add example-server:abc123
