@@ -19,13 +19,22 @@ func main() {
 	backend := flag.String("backend", "etcdv3", "Key/value store backend.")
 	prefix := flag.String("prefix", "/example", "Key/value store prefix.")
 	endpoints := flag.String("endpoints", "127.0.0.1:2379", "Comma-delimited list of hosts in the key/value store cluster.")
+	ca := flag.String("ca", "", "TLS client CA certificate.")
+	cert := flag.String("cert", "", "TLS client certificate file.")
+	key := flag.String("key", "", "TLS client key file.")
 	timeout := flag.Int("timeout", 5, "Connection timeout for key/value cluster in seconds.")
 	keepalive := flag.Int("keepalive", 5, "Connection keepalive for key/value cluster in seconds.")
 	flag.Parse()
 
+	// Create TLS config.
+	tlsCfg, err := model.TLSConfig(*ca, *cert, *key, "", false)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Connect to etcd.
 	log.Printf("connect to etcd")
-	ds, err := model.NewDatastore(*backend, strings.Split(*endpoints, ","), *keepalive, kvstore.WithTimeout(*timeout), kvstore.WithEncoding("json"), kvstore.WithPrefix(*prefix))
+	ds, err := model.NewDatastore(*backend, strings.Split(*endpoints, ","), *keepalive, kvstore.WithTimeout(*timeout), kvstore.WithEncoding("json"), kvstore.WithPrefix(*prefix), kvstore.WithTLS(tlsCfg))
 	if err != nil {
 		log.Fatal(err)
 	}
