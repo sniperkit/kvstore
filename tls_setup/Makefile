@@ -3,7 +3,7 @@
 all: ca req
 
 clean:
-	rm -rf certs
+	rm -rf certs data
 
 preq:
 	go get -u -tags nopkcs11 github.com/cloudflare/cfssl/cmd/cfssl
