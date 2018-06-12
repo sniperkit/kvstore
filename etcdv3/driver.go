@@ -39,8 +39,8 @@ func (d *driver) SetPassword(password string) error {
 }
 
 func (d *driver) SetEncoding(encoding string) error {
-	if err := encdec.Registered(encoding); err != nil {
-		return err
+	if ok := encdec.Registered(encoding); !ok {
+		return fmt.Errorf("encoding not registered: %s", encoding)
 	}
 	d.encoding = encoding
 	return nil
