@@ -10,7 +10,7 @@ type Datastore struct {
 	kvstore.Conn
 }
 
-func NewDatastore(driver string, endpoints []string, keepalive int, options ...kvstore.ConnOption) (*Datastore, error) {
+func NewDatastore(driver string, endpoints []string, keepalive int, options ...kvstore.DriverOption) (*Datastore, error) {
 	c, err := kvstore.Open(driver, endpoints, options...)
 	if err != nil {
 		return nil, err

@@ -50,16 +50,12 @@ func WithTLS(config *tls.Config) DriverOption {
 	}
 }
 
-// WithUser for database connection.
-func WithUser(user string) DriverOption {
+// WithAuth for database connection.
+func WithAuth(user, password string) DriverOption {
 	return func(d Driver) error {
-		return d.SetUser(user)
-	}
-}
-
-// WithPassword for database connection.
-func WithPassword(password string) DriverOption {
-	return func(d Driver) error {
+		if err := d.SetUser(user); err != nil {
+			return err
+		}
 		return d.SetPassword(password)
 	}
 }

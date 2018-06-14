@@ -39,7 +39,7 @@ func (c *conn) Lease(ttl int) (kvstore.Lease, error) {
 	}, nil
 }
 
-func (c *conn) Set(key string, value interface{}, options ...func(kvstore.KeyValue) error) error {
+func (c *conn) Set(key string, value interface{}, options ...kvstore.KeyValueOption) error {
 	kv := &keyValue{}
 	for _, option := range options {
 		if err := option(kv); err != nil {
